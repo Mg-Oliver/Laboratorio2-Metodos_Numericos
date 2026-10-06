@@ -14,3 +14,4 @@ documentos/
 # Dependencias y entorno
 node_modules/
 .vercel/
+tmp/

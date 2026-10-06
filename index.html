@@ -9,11 +9,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Vue 3 CDN -->
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="vendor/vue.global.prod.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#introduccion">Saltar al contenido</a>
+  <noscript>Activa JavaScript para usar las matrices animadas y el simulador.</noscript>
 
-  <div id="app">
+  <div id="app" v-cloak>
     <!-- Sticky Navigation Header -->
     <nav class="header-nav">
       <div class="nav-brand">
@@ -21,7 +23,8 @@
         <span class="nav-title">Laboratorio N°2: Métodos Simultáneos</span>
       </div>
 
-      <div class="nav-links">
+      <button class="menu-toggle" @click="menuOpen = !menuOpen" :aria-expanded="menuOpen" aria-controls="section-menu">{{ menuOpen ? "Cerrar" : "Secciones" }} ☰</button>
+      <div id="section-menu" class="nav-links" :class="{'menu-open': menuOpen}" @click="menuOpen = false">
         <a href="#portada" class="nav-link" :class="{ active: activeSection === 'portada' }">Inicio</a>
         <a href="#introduccion" class="nav-link" :class="{ active: activeSection === 'introduccion' }">Problema</a>
         <a href="#formulacion" class="nav-link" :class="{ active: activeSection === 'formulacion' }">Formulación</a>
@@ -41,7 +44,7 @@
         <div class="badge-pill">UNIVERSIDAD TECNOLÓGICA DE PANAMÁ • CENTRO REGIONAL DE AZUERO</div>
         <h1 class="hero-h1">Métodos de Ecuaciones Lineales Simultáneas</h1>
         <p class="hero-p">
-          Resolución Paso a Paso, Procedimientos Rigurosos e Implementación en JavaScript de Eliminación Gaussiana, Gauss-Jordan y Gauss-Seidel
+          Tres métodos, un mismo problema. Sigue el movimiento de las filas, comprende cada operación y verifica el resultado.
         </p>
 
         <div class="author-grid">
@@ -49,7 +52,7 @@
             <strong>Miguel Oliver</strong> • Cédula: 8-1050-1381
           </div>
           <div class="author-card">
-            <strong>Juan Rodríguez</strong> • Cédula: 6-728-1695
+            <strong>Juan Rodríguez</strong> • Cédula: 9-728-1695
           </div>
         </div>
 
@@ -58,7 +61,7 @@
         </p>
 
         <a href="#introduccion" class="scroll-indicator">
-          <span>Desplaza hacia abajo para ver el procedimiento</span>
+          <span>Explorar el laboratorio</span>
           <span style="font-size: 1.2rem;">▼</span>
         </a>
       </section>
@@ -226,7 +229,7 @@
         <div class="section-tag">02. Modelado Matemático</div>
         <h2 class="section-title">Formulación del Sistema de Ecuaciones A · x = b</h2>
         <p class="section-desc">
-          Definiendo las incógnitas <strong>x₁</strong>, <strong>x₂</strong>, <strong>x₃</strong> como los metros cúbicos ($m^3$) a extraer de la Cantera 1, Cantera 2 y Cantera 3 respectivamente:
+          Definiendo las incógnitas <strong>x₁</strong>, <strong>x₂</strong>, <strong>x₃</strong> como los metros cúbicos (m³) a extraer de la Cantera 1, Cantera 2 y Cantera 3 respectivamente:
         </p>
 
         <div class="grid-2" style="align-items: center; margin-bottom: 2rem;">
@@ -265,7 +268,7 @@
             <span>Verificación Gráfica de la Diagonal Principal Dominante</span>
           </div>
           <div class="graphic-showcase-subtitle">
-            Condición matemática que garantiza la estabilidad y convergencia iterativa: |a_ii| ≥ Σ |a_ij|
+            Dominancia diagonal: |aᵢᵢ| ≥ ∑ⱼ≠ᵢ |aᵢⱼ|. En este sistema, la matriz es irreducible y hay filas estrictamente dominantes; estas condiciones aseguran la convergencia de Gauss-Seidel.
           </div>
 
           <div class="grid-3">
@@ -306,6 +309,8 @@
         <p class="section-desc">
           Muestra los resultados en una matriz triangular. Procedimiento paso a paso según los apuntes de clase (Pasos 1 al 8):
         </p>
+<matrix-player method="gauss" :matrix="originalA" :demands="originalB"></matrix-player>
+<details class="method-details"><summary>Desarrollo matemático, gráficos y apuntes de Gauss</summary>
 
         <!-- Diagrama de Flujo del Algoritmo -->
         <div class="flowchart-container">
@@ -437,8 +442,8 @@
             <div class="step-title">Reemplazar x₂ y x₃ en la primera ecuación normalizada para encontrar x₁ (obteniendo los 3 valores)</div>
             <div class="step-math-box">
               <div>x₁ + 0.384615 (7162.7907) + 0.480769 (5125.5814) = 9230.7692</div>
-              <div>x₁ + 2754.9195 + 2464.2185 = 9230.7692</div>
-              <div>x₁ = 9230.7692 - 5219.1380 = <strong>4,011.6312 m³</strong> (≈ 4,011.6279 m³)</div>
+              <div>x₁ + 2754.9195 + 2464.2218 ≈ 9230.7692</div>
+              <div>x₁ ≈ 9230.7692 − 5219.1413 ≈ <strong>4,011.6279 m³</strong></div>
             </div>
           </div>
         </div>
@@ -518,9 +523,9 @@
             <span><strong>CÓDIGO FUENTE:</strong> gauss.js (Eliminación Gaussiana)</span>
             <span>JavaScript (Node.js & Web)</span>
           </div>
-          <pre><code>{{ codeGauss }}</code></pre>
+          <p class="small-note">Código del motor compartido. Consulta las validaciones y funciones auxiliares en <a href="algoritmos/core.js" target="_blank" rel="noopener">algoritmos/core.js</a>.</p><pre><code>{{ codeGauss }}</code></pre>
         </div>
-      </section>
+      </details></section>
 
       <!-- ==================== 5. MÉTODO 2: GAUSS - JORDAN ==================== -->
       <section id="metodo-jordan" class="web-section">
@@ -529,6 +534,8 @@
         <p class="section-desc">
           Se trabaja con una matriz identidad para encontrar las soluciones. Pasos a seguir en el método (Pasos 1 al 10):
         </p>
+<matrix-player method="jordan" :matrix="originalA" :demands="originalB"></matrix-player>
+<details class="method-details"><summary>Desarrollo matemático, gráficos y apuntes de Jordan</summary>
 
         <!-- Diagrama de Flujo del Algoritmo -->
         <div class="flowchart-container">
@@ -749,18 +756,20 @@
             <span><strong>CÓDIGO FUENTE:</strong> gauss-jordan.js (Gauss - Jordan)</span>
             <span>JavaScript (Node.js & Web)</span>
           </div>
-          <pre><code>{{ codeJordan }}</code></pre>
+          <p class="small-note">El mismo motor sirve a la consola y a estas animaciones: <a href="algoritmos/core.js" target="_blank" rel="noopener">algoritmos/core.js</a>.</p><pre><code>{{ codeJordan }}</code></pre>
         </div>
-      </section>
+      </details></section>
 
       <!-- ==================== 6. MÉTODO 3: GAUSS - SEIDEL ==================== -->
       <section id="metodo-seidel" class="web-section">
         <div class="section-tag">05. Método 3 (Apuntes de Clase)</div>
         <h2 class="section-title">Gauss Seidel</h2>
         <p class="section-desc">
-          En los dos primeros métodos el error se trabaja a medida de un error normalizado. En Gauss Seidel sí se utilizará la fórmula de error: 
-          <strong>Ea = |(Va - Vant) / Va| * 100</strong>. Pasos a seguir en el método (Pasos 1 al 9):
+          En los métodos directos comprobamos el residuo r = Ax − b. En Gauss-Seidel medimos el cambio relativo entre aproximaciones:
+          <span class="math-inline" aria-label="Error aproximado relativo: diferencia entre valor actual y anterior, dividida entre el actual, en porcentaje"><span>E<sub>a,i</sub><sup>(k)</sup> = |</span><span class="math-fraction"><span>x<sub>i</sub><sup>(k)</sup> − x<sub>i</sub><sup>(k−1)</sup></span><span>x<sub>i</sub><sup>(k)</sup></span></span><span>| × 100 %</span></span>. Pasos a seguir en el método (Pasos 1 al 9):
         </p>
+<matrix-player method="seidel" :matrix="originalA" :demands="originalB"></matrix-player>
+<details class="method-details"><summary>Desarrollo matemático, gráficos y apuntes de Seidel</summary>
 
         <!-- Procedimiento Riguroso Paso a Paso -->
         <div class="apuntes-procedure-container">
@@ -835,7 +844,7 @@
 
           <div class="apuntes-step">
             <span class="step-num-badge">Paso 9</span>
-            <div class="step-title">Verificar el error en cada incógnita (Ea = |(Va - Vant) / Va| * 100)</div>
+            <div class="step-title">Verificar el error en cada incógnita (Eₐ,ᵢ⁽ᵏ⁾ = |(xᵢ⁽ᵏ⁾ − xᵢ⁽ᵏ⁻¹⁾) / xᵢ⁽ᵏ⁾| × 100 %)</div>
             <div class="step-math-box">
               <div>Ea(x₁) = |(4965.1425 - 9230.7692) / 4965.1425| × 100% = <strong>85.91%</strong></div>
               <div>Ea(x₂) = |(7038.0054 - 6081.5385) / 7038.0054| × 100% = <strong>13.59%</strong></div>
@@ -981,106 +990,38 @@
           </div>
           <pre><code>{{ codeSeidel }}</code></pre>
         </div>
-      </section>
+      </details></section>
 
       <!-- ==================== 7. SIMULADOR INTERACTIVO VUE ==================== -->
       <section id="simulador" class="web-section">
-        <div class="section-tag">06. Demostración en Tiempo Real</div>
-        <h2 class="section-title">Simulador Numérico Reactivo con Vue 3</h2>
-        <p class="section-desc">
-          Modifica los requerimientos volumétricos $b$ para verificar cómo los algoritmos en JavaScript recalculan dinámicamente las soluciones:
-        </p>
-
-        <div class="grid-2">
-          <div class="card">
-            <h3 style="margin-bottom: 1.2rem;">Vector de Demandas Volumétricas (b)</h3>
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-              <div class="sim-input-group">
-                <label>Demanda de Arena (m³):</label>
-                <input type="number" v-model.number="vectorB[0]" class="sim-control">
-              </div>
-              <div class="sim-input-group">
-                <label>Demanda de Grava Fina (m³):</label>
-                <input type="number" v-model.number="vectorB[1]" class="sim-control">
-              </div>
-              <div class="sim-input-group">
-                <label>Demanda de Grava Gruesa (m³):</label>
-                <input type="number" v-model.number="vectorB[2]" class="sim-control">
-              </div>
-            </div>
-          </div>
-
-          <div class="card" style="border-color: var(--accent-primary);">
-            <h3 style="color: var(--accent-light); margin-bottom: 1.2rem;">Resultado Recalculado en Vivo</h3>
-            <div style="display: flex; flex-direction: column; gap: 0.8rem; font-family: var(--font-mono);">
-              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
-                <span>x₁ (Cantera 1):</span>
-                <strong style="color: white; font-size: 1.25rem;">{{ calcGauss[0].toFixed(2) }} m³</strong>
-              </div>
-              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
-                <span>x₂ (Cantera 2):</span>
-                <strong style="color: white; font-size: 1.25rem;">{{ calcGauss[1].toFixed(2) }} m³</strong>
-              </div>
-              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
-                <span>x₃ (Cantera 3):</span>
-                <strong style="color: white; font-size: 1.25rem;">{{ calcGauss[2].toFixed(2) }} m³</strong>
-              </div>
-            </div>
-
-            <!-- Gráfico Reactivo de Barras en Tiempo Real -->
-            <div class="sim-chart-container">
-              <div style="font-size: 0.82rem; font-weight: 700; color: white; margin-bottom: 0.2rem;">
-                Distribución Volumétrica Reactiva
-              </div>
-
-              <div class="sim-bar-item">
-                <div class="sim-bar-header">
-                  <span>Cantera 1 (x₁)</span>
-                  <span><strong>{{ calcGauss[0].toFixed(2) }} m³</strong> ({{ pctX1 }}%)</span>
-                </div>
-                <div class="sim-bar-track">
-                  <div class="sim-bar-fill chunk-c1" :style="{ width: ((calcGauss[0] / maxValCalc) * 100) + '%' }"></div>
-                </div>
-              </div>
-
-              <div class="sim-bar-item">
-                <div class="sim-bar-header">
-                  <span>Cantera 2 (x₂)</span>
-                  <span><strong>{{ calcGauss[1].toFixed(2) }} m³</strong> ({{ pctX2 }}%)</span>
-                </div>
-                <div class="sim-bar-track">
-                  <div class="sim-bar-fill chunk-c2" :style="{ width: ((calcGauss[1] / maxValCalc) * 100) + '%' }"></div>
-                </div>
-              </div>
-
-              <div class="sim-bar-item">
-                <div class="sim-bar-header">
-                  <span>Cantera 3 (x₃)</span>
-                  <span><strong>{{ calcGauss[2].toFixed(2) }} m³</strong> ({{ pctX3 }}%)</span>
-                </div>
-                <div class="sim-bar-track">
-                  <div class="sim-bar-fill chunk-c3" :style="{ width: ((calcGauss[2] / maxValCalc) * 100) + '%' }"></div>
-                </div>
-              </div>
-
-              <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-dim); text-align: right;">
-                Volumen Total Extraído: <strong style="color:white;">{{ totalVolumenCalc.toFixed(2) }} m³</strong>
-              </div>
-            </div>
-
-            <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-dim);">
-              Gauss-Seidel converge con esta configuración en <strong>{{ calcSeidel.iter }} iteraciones</strong> (Ea ≤ 5%).
-            </p>
-          </div>
-        </div>
-      </section>
+ <div class="section-tag">06. Experimenta con las demandas</div><h2 class="section-title">Del sistema a la solución</h2>
+ <p class="section-desc">Conserva la composición de las canteras y modifica las demandas. Compara los tres métodos y recorre las operaciones con tus propios datos.</p>
+ <div class="sim-layout">
+  <div class="card sim-form"><h3>Demandas de materiales</h3>
+   <div class="sim-input-group" v-for="(name,i) in ['Arena','Grava fina','Grava gruesa']" :key="i"><label :for="'demand-'+i">{{name}} (m³)</label><input :id="'demand-'+i" type="number" min="0" step="any" v-model.number="vectorB[i]" class="sim-control" :aria-invalid="!!validation"></div>
+   <div class="sim-input-group"><label for="tolerance">Tolerancia Eₐ (%)</label><input id="tolerance" type="number" min="0.000001" step="any" v-model.number="seidelTol" class="sim-control"></div>
+   <button class="secondary" @click="reset">Restaurar problema original</button><p class="small-note">Por defecto: x⁽⁰⁾ = [0; 0; 0], Eₐ ≤ 5 % y un máximo de 100 iteraciones.</p>
+  </div>
+  <div class="card sim-results" aria-live="polite">
+   <template v-if="simulation.error"><p class="notice error" role="alert">{{simulation.error}}</p></template>
+   <template v-else>
+    <h3>Resultados y comprobación</h3>
+    <div class="table-scroll"><table class="web-table"><thead><tr><th>Método</th><th>x₁ (m³)</th><th>x₂ (m³)</th><th>x₃ (m³)</th><th>Máximo |Ax − b|</th></tr></thead><tbody><tr v-for="(name,key) in {gauss:'Gauss',jordan:'Gauss-Jordan',seidel:'Gauss-Seidel'}" :key="key"><th>{{name}}</th><td v-for="(v,j) in simulation[key].x" :key="j">{{f(v,2)}}</td><td>{{f(Math.max(...simulation[key].residual.map(Math.abs)),8)}} m³</td></tr></tbody></table></div>
+    <p class="notice" :class="{warning:!calcSeidel.converged}"><strong>{{calcSeidel.converged?'Gauss-Seidel alcanzó la tolerancia':'Gauss-Seidel no alcanzó la tolerancia'}}</strong> · {{calcSeidel.iterations}} iteraciones. <span v-if="calcSeidel.converged">El cambio relativo cumple Eₐ ≤ {{seidelTol}} %.</span><span v-else>Se llegó al límite de iteraciones o a valores no finitos.</span></p>
+    <p class="notice warning" v-if="!feasible"><strong>Esta demanda no es viable con las tres canteras.</strong> La solución matemática requiere un volumen negativo. Modifica la combinación de materiales para obtener cantidades físicamente realizables.</p>
+    <div v-else class="sim-chart-container"><div v-for="(v,j) in calcGauss" :key="j" class="sim-bar-item"><div class="sim-bar-header"><span>Cantera {{j+1}}</span><strong>{{f(v,2)}} m³</strong></div><div class="sim-bar-track"><div class="sim-bar-fill" :class="'chunk-c'+(j+1)" :style="{width:(Math.max(0,v)/maxValCalc*100)+'%'}"></div></div></div><p class="small-note">Volumen total: {{f(totalVolumenCalc,2)}} m³. Las barras usan la solución de Gauss.</p></div>
+   </template>
+  </div>
+ </div>
+ <template v-if="!simulation.error"><div class="method-selector" role="group" aria-label="Método de la animación"><button v-for="(label,key) in {gauss:'Gauss',jordan:'Gauss-Jordan',seidel:'Gauss-Seidel'}" :key="key" @click="simMethod=key" :aria-pressed="simMethod===key" :class="{primary:simMethod===key}">{{label}}</button></div><matrix-player :method="simMethod" :matrix="matrixA" :demands="vectorB" :tolerance="seidelTol"></matrix-player></template>
+</section>
 
       <!-- ==================== 8. CUADRO COMPARATIVO ==================== -->
       <section id="comparativa" class="web-section">
         <div class="section-tag">07. Resultados Consolidados</div>
         <h2 class="section-title">Cuadro Comparativo de los Tres Métodos</h2>
         <p class="section-desc">
-          Comparación directa de los valores de extracción por cantera obtenidos mediante cada uno de los métodos programados:
+          Resultados del problema original. Para comparar otras demandas, utiliza el simulador de la sección anterior:
         </p>
 
         <table class="web-table">
@@ -1114,13 +1055,13 @@
           </tbody>
         </table>
 
-        <!-- Gráfico Comparativo SVG de los Tres Métodos -->
+        <div class="grid-3 interpretation"><div class="card"><h3>¿Cuál es más rápido?</h3><p>Gauss obtiene la solución en un número finito de operaciones; Gauss-Jordan elimina también por encima de los pivotes. Gauss-Seidel requiere cuatro iteraciones al 5 % en este problema. Una iteración no equivale a una operación de fila; no se midieron tiempos de ejecución.</p></div><div class="card"><h3>¿Cuál es más preciso?</h3><p>Para este sistema, los métodos directos dejan un residuo cercano a cero en precisión de máquina. Gauss-Seidel se detiene según el cambio entre iteraciones. Una tolerancia menor suele requerir más iteraciones.</p></div><div class="card"><h3>¿Cuál es más exacto?</h3><p>Gauss y Gauss-Jordan coinciden con la solución de referencia. Ningún decimal redondeado es un valor exacto. La precisión depende de la aritmética, el condicionamiento del sistema y la estabilidad del algoritmo.</p></div></div><!-- Gráfico Comparativo SVG de los Tres Métodos -->
         <div class="graphic-showcase">
           <div class="graphic-showcase-title">
             <span>Contraste Visual de Resultados entre Métodos</span>
           </div>
           <div class="graphic-showcase-subtitle">
-            Comparativa de barras agrupadas: Gauss vs Gauss-Jordan (solución exacta) frente a Gauss-Seidel (aproximación al 5%).
+            Comparativa de barras agrupadas: Gauss vs Gauss-Jordan (solución de referencia) frente a Gauss-Seidel (aproximación al 5%).
           </div>
 
           <div class="grid-3">
@@ -1231,7 +1172,7 @@
             <span>Distribución Global y Aporte Físico a Cada Material de Construcción</span>
           </div>
           <div class="graphic-showcase-subtitle">
-            Verificación de ingeniería: proporción extraída de cada cantera y suma exacta de los volúmenes para cumplir el pedido civil.
+            Verificación de ingeniería: proporción extraída de cada cantera y suma de los volúmenes calculados para cumplir el pedido civil.
           </div>
 
           <div class="grid-2">
@@ -1349,10 +1290,10 @@
 
       <!-- Modal de Apuntes Manuscritos Oficiales -->
       <div v-if="apunteModal.show" class="apunte-modal-backdrop" @click.self="closeApunte">
-        <div class="apunte-modal-content">
+        <div class="apunte-modal-content" role="dialog" aria-modal="true" aria-labelledby="apunte-title">
           <div class="apunte-modal-header">
-            <h3>{{ apunteModal.title }}</h3>
-            <button class="apunte-modal-close" @click="closeApunte">&times;</button>
+            <h3 id="apunte-title">{{ apunteModal.title }}</h3>
+            <button class="apunte-modal-close" aria-label="Cerrar apuntes" @click="closeApunte">&times;</button>
           </div>
           <div class="apunte-modal-body">
             <img :src="apunteModal.img" :alt="apunteModal.title">
@@ -1366,6 +1307,7 @@
     </div>
   </div>
 
+  <script src="algoritmos/core.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

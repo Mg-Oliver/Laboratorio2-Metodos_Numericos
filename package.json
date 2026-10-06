@@ -5,7 +5,9 @@
   "main": "algoritmos/index.js",
   "scripts": {
     "start": "node algoritmos/index.js",
-    "calc": "node algoritmos/index.js"
+    "calc": "node algoritmos/index.js",
+    "dev": "node scripts/serve.js",
+    "test": "node --test tests/*.test.js"
   },
   "keywords": [
     "metodos-numericos",

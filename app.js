@@ -1,312 +1,151 @@
-// Lógica de Presentación Web Continua en Vue 3
-// Métodos Numéricos - Laboratorio N°2 (UTP Azuero)
+/* La web y la consola comparten algoritmos/core.js. */
+const { createApp, ref, computed, watch, onMounted, onUnmounted, nextTick } = Vue;
+const ORIGINAL_A = [[.52,.20,.25],[.30,.50,.20],[.18,.30,.55]];
+const ORIGINAL_B = [4800,5810,5690];
+const f = (v, digits = 4) => v == null ? '—' : !Number.isFinite(v) ? '∞' : new Intl.NumberFormat('es-PA', {maximumFractionDigits:digits}).format(Math.abs(v) < 1e-10 ? 0 : v);
+const subs = ['₁','₂','₃'];
+const MatrixPlayer = {
+  props: {method:String, matrix:Array, demands:Array, tolerance:{default:5}},
+  setup(props) {
+    const position=ref(0), playing=ref(false), speed=ref(1), phase=ref('after');
+    const media=window.matchMedia('(prefers-reduced-motion: reduce)'), reduced=ref(media.matches);
+    const smallMedia=window.matchMedia('(max-width:600px)'), small=ref(smallMedia.matches);
+    const cellFormat=(v,j)=>f(v,small.value?(j===props.matrix.length?2:4):6);
+    let timer, motionTimer;
+    const result=computed(() => {
+      try {
+        const fn=props.method==='jordan' ? Numerica.resolverGaussJordan : props.method==='seidel' ? Numerica.resolverGaussSeidel : Numerica.resolverGauss;
+        return {data:fn(props.matrix,props.demands,{tol:Number(props.tolerance)})};
+      } catch(e) {return {error:e.message};}
+    });
+    const steps=computed(()=>result.value.data?.pasos || []);
+    const step=computed(()=>steps.value[Math.min(position.value,steps.value.length-1)]);
+    const shown=computed(()=>phase.value==='moving' ? step.value.before : step.value.matriz);
+    const vector=computed(()=>phase.value==='moving' && step.value.previousX ? step.value.previousX : step.value.x);
+    const stop=()=>{playing.value=false;clearTimeout(timer);};
+    function animate() {
+      clearTimeout(motionTimer);
+      phase.value=reduced.value || position.value===0 ? 'after' : 'moving';
+      if(phase.value==='moving') motionTimer=setTimeout(()=>{phase.value='after';},760/speed.value);
+    }
+    function go(index) {stop();position.value=Math.max(0,Math.min(steps.value.length-1,index));animate();}
+    function schedule() {
+      clearTimeout(timer);
+      if(!playing.value)return;
+      timer=setTimeout(()=>{
+        if(position.value>=steps.value.length-1){stop();return;}
+        position.value++;animate();schedule();
+      },2400/speed.value);
+    }
+    function play() {
+      if(playing.value){stop();return;}
+      if(position.value===steps.value.length-1){position.value=0;phase.value='after';}
+      playing.value=true;schedule();
+    }
+    const replay=()=>{stop();animate();};
+    watch(()=>[props.matrix,props.demands,props.tolerance,props.method],()=>{stop();clearTimeout(motionTimer);position.value=0;phase.value='after';},{deep:true});
+    watch(speed,()=>{if(playing.value)schedule();});
+    const preferenceChanged=e=>{reduced.value=e.matches;};
+    const sizeChanged=e=>{small.value=e.matches;};
+    onMounted(()=>{media.addEventListener('change',preferenceChanged);smallMedia.addEventListener('change',sizeChanged);});
+    onUnmounted(()=>{stop();clearTimeout(motionTimer);media.removeEventListener('change',preferenceChanged);smallMedia.removeEventListener('change',sizeChanged);});
+    const numerator=computed(()=>{
+      const s=step.value;if(s?.type!=='iterate')return '';
+      return f(props.demands[s.row],4)+' − ('+props.matrix[s.row].map((a,j)=>j===s.row?null:`${f(a)} × ${f(s.previousX[j])}`).filter(Boolean).join(' + ')+')';
+    });
+    const arithmetic=computed(()=>{
+      const s=step.value;
+      if(!s || !['normalize','eliminate'].includes(s.type))return [];
+      return s.matriz[s.row].map((v,j)=>({label:j===props.matrix.length?'b':'x'+subs[j],
+        expression:s.type==='normalize' ? `${f(s.before[s.row][j],6)} ÷ ${f(s.factor,6)}` : `${f(s.before[s.row][j],6)} − (${f(s.factor,6)} × ${f(s.before[s.source][j],6)})`,after:v}));
+    });
+    function key(e) {
+      if(['INPUT','SELECT','BUTTON'].includes(e.target.tagName))return;
+      if(e.key==='ArrowRight'){e.preventDefault();go(position.value+1);}
+      if(e.key==='ArrowLeft'){e.preventDefault();go(position.value-1);}
+      if(e.key===' '){e.preventDefault();play();}
+    }
+    return {position,playing,speed,phase,reduced,result,steps,step,shown,vector,go,play,replay,arithmetic,key,f,subs,cellFormat,numerator};
+  },
+  template:`
+  <div class="matrix-player" :class="{'is-moving':phase==='moving','reduced-motion':reduced}" tabindex="0" @keydown="key" :aria-label="'Animación paso a paso: '+method">
+    <div class="player-heading"><div><span class="eyebrow">LABORATORIO VISUAL</span><h3>{{method==='seidel'?'Una incógnita a la vez':'Observa cada operación de fila'}}</h3></div><span class="player-count" v-if="steps.length">{{position+1}} / {{steps.length}}</span></div>
+    <p v-if="result.error" class="notice error" role="alert">{{result.error}}</p>
+    <template v-else-if="step">
+      <div class="player-controls">
+        <button @click="go(0)" :disabled="position===0" aria-label="Volver al inicio">↺ Inicio</button>
+        <button @click="go(position-1)" :disabled="position===0" aria-label="Paso anterior">← Anterior</button>
+        <button class="primary" @click="play">{{playing?'Ⅱ Pausar':'▶ Reproducir'}}</button>
+        <button @click="go(position+1)" :disabled="position===steps.length-1" aria-label="Paso siguiente">Siguiente →</button>
+        <button @click="replay" :disabled="position===0">Repetir paso</button>
+        <label class="speed-label">Velocidad <select v-model.number="speed"><option :value="0.5">0.5×</option><option :value="1">1×</option><option :value="1.5">1.5×</option><option :value="2">2×</option></select></label>
+      </div>
+      <input class="step-range" type="range" min="0" :max="steps.length-1" :value="position" @input="go(Number($event.target.value))" aria-label="Elegir paso">
+      <div class="operation-title" aria-live="polite"><span class="step-num-badge">{{step.iter?'Iteración '+step.iter:'Paso '+(position+1)}}</span><h4>{{step.titulo}}</h4><p>{{step.descripcion}}</p></div>
+      <div class="formula-display structured-math" v-if="step.type==='iterate'"><span>x<sub>{{step.row+1}}</sub><sup>({{step.iter}})</sup> = </span><span class="math-fraction"><span>{{numerator}}</span><span>{{f(matrix[step.row][step.row])}}</span></span><span> ≈ {{f(step.x[step.row],6)}}</span></div>
+      <div class="formula-display" v-else>{{step.formula}}</div>
+      <div class="visual-stage" :class="{'seidel-stage':method==='seidel'}">
+        <div class="matrix-panel">
+          <div class="matrix-caption"><span>{{method==='seidel'?'Matriz A fija · sistema original':phase==='moving'?'Antes de aplicar la operación':'Matriz después de la operación'}}</span><span class="stage-pill">{{phase==='moving'?'Aplicando…':'Resultado'}}</span></div>
+          <div class="matrix-board" :style="{'--motion-duration':(760/speed)+'ms'}">
+            <div class="matrix-column-labels"><span></span><span v-for="(r,j) in matrix" :key="j">x{{subs[j]}}</span><span>b</span></div>
+            <div v-for="(row,i) in shown" :key="i" class="animated-row" :class="{'target-row':i===step.row,'source-row':i===step.source,'normalizing':phase==='moving'&&step.type==='normalize'&&i===step.row}">
+              <span class="row-name">F{{subs[i]}}</span>
+              <div v-for="(v,j) in row" :key="j" class="animated-cell" :class="{'rhs-cell':j===matrix.length,'pivot-cell':j===step.col&&i===(step.source??step.row),'changed-cell':phase==='after'&&step.before[i][j]!==v}">
+                <Transition name="number" mode="out-in"><span :key="cellFormat(v,j)">{{cellFormat(v,j)}}</span></Transition>
+              </div>
+            </div>
+            <div v-if="phase==='moving'&&(step.type==='eliminate'||step.type==='swap')" :key="position" class="travelling-row" :style="{'--from':(step.source*56+30)+'px','--distance':((step.row-step.source)*56)+'px'}">
+              <span class="row-name">{{step.type==='swap'?'↔':'× '+f(step.factor,2)}}</span><span v-for="(v,j) in step.before[step.source]" :key="j">{{cellFormat(step.type==='swap'?v:v*step.factor,j)}}</span>
+            </div>
+          </div>
+          <div class="matrix-legend"><span><i class="legend-pivot"></i>Pivote</span><span><i class="legend-source"></i>Fila utilizada</span><span><i class="legend-target"></i>Fila actualizada</span></div>
+        </div>
+        <div class="vector-panel" v-if="method==='seidel'||step.type==='back'||step.type==='solution'">
+          <h4>{{method==='seidel'?'Valores usados en esta vuelta':'Solución por sustitución'}}</h4>
+          <div v-for="(v,j) in vector" :key="j" class="vector-value" :class="{'vector-active':j===step.row,'vector-new':method==='seidel'&&j<step.row}"><span>x{{subs[j]}}</span><Transition name="number" mode="out-in"><strong :key="f(v)">{{f(v)}}</strong></Transition><small>{{phase==='moving'&&method==='seidel'&&j===step.row?'calculando…':method==='seidel'&&step.iter?j<=step.row?'nuevo · vuelta '+step.iter:'anterior · vuelta '+(step.iter-1):v===null?'por calcular':'m³'}}</small></div>
+          <p class="small-note" v-if="method==='seidel'">El valor recién calculado se usa inmediatamente en la siguiente ecuación.</p>
+        </div>
+      </div>
+      <div class="arithmetic-grid" v-if="arithmetic.length"><div v-for="(a,j) in arithmetic" :key="position+':'+j" class="arithmetic-card"><span class="eyebrow">{{a.label==='b'?'TÉRMINO INDEPENDIENTE':'COEFICIENTE DE '+a.label}}</span><p>{{a.expression}}</p><strong>≈ {{f(a.after,6)}}</strong></div></div>
+      <div class="notice" v-if="position===steps.length-1"><strong>{{method==='seidel'?result.data.converged?'Criterio de parada alcanzado':'No se alcanzó la tolerancia':'Solución calculada'}}</strong><p>x = [{{result.data.x.map(v=>f(v)).join('; ')}}] m³ · Máximo |Ax − b| = {{f(Math.max(...result.data.residual.map(Math.abs)),8)}} m³</p><p v-if="method==='seidel'">Ea mide el cambio entre iteraciones; no es el error respecto de la solución de referencia.</p></div>
+      <p class="player-help">Flechas ← →: avanzar. Espacio: reproducir o pausar. Las cifras mostradas están redondeadas; los cálculos conservan su precisión.</p>
+    </template>
+  </div>`
+};
 
-const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
-
-const app = createApp({
+const app=createApp({
   setup() {
-    const activeSection = ref('portada');
-
-    // Datos del problema en el simulador interactivo
-    const matrixA = ref([
-      [0.52, 0.20, 0.25],
-      [0.30, 0.50, 0.20],
-      [0.18, 0.30, 0.55]
-    ]);
-    const vectorB = ref([4800, 5810, 5690]);
-    const seidelTol = ref(5.0);
-
-    // Códigos fuente completos y documentados en JavaScript
-    const codeGauss = `/**
- * MÉTODO 1: ELIMINACIÓN GAUSSIANA SIMPLE (N x N)
- * Archivo: gauss.js
- *
- * Implementa la normalización de la fila pivote y eliminación hacia adelante,
- * generando una matriz triangular superior, seguida de sustitución regresiva.
- */
-function resolverGauss(A, b) {
-  const n = A.length;
-  // Construcción de la matriz aumentada [A | b]
-  let M = A.map((row, i) => [...row, b[i]]);
-
-  // 1. Eliminación hacia adelante (Normalización e interacciones)
-  for (let i = 0; i < n; i++) {
-    const pivote = M[i][i];
-    if (Math.abs(pivote) < 1e-12) {
-      throw new Error(\`Pivote nulo en fila \${i + 1}\`);
-    }
-
-    // Normalizar la fila pivote Fila i
-    for (let j = i; j <= n; j++) {
-      M[i][j] /= pivote;
-    }
-
-    // Eliminar incógnita en filas inferiores
-    for (let k = i + 1; k < n; k++) {
-      const factor = M[k][i];
-      if (Math.abs(factor) > 1e-12) {
-        for (let j = i; j <= n; j++) {
-          M[k][j] -= factor * M[i][j];
-        }
-      }
-    }
-  }
-
-  // 2. Sustitución hacia atrás
-  const x = new Array(n).fill(0);
-  for (let i = n - 1; i >= 0; i--) {
-    let suma = M[i][n];
-    for (let j = i + 1; j < n; j++) {
-      suma -= M[i][j] * x[j];
-    }
-    x[i] = suma;
-  }
-
-  return x;
-}`;
-
-    const codeJordan = `/**
- * MÉTODO 2: GAUSS - JORDAN (N x N)
- * Archivo: gauss-jordan.js
- *
- * Transforma la matriz aumentada [A | b] directamente a la Matriz Identidad [I | x]
- * mediante eliminación simultánea por encima y por debajo de cada pivote.
- */
-function resolverGaussJordan(A, b) {
-  const n = A.length;
-  // Construcción de la matriz aumentada [A | b]
-  let M = A.map((row, i) => [...row, b[i]]);
-
-  // Eliminación sistemática para cada columna pivote
-  for (let i = 0; i < n; i++) {
-    const pivote = M[i][i];
-    if (Math.abs(pivote) < 1e-12) {
-      throw new Error(\`Pivote nulo en fila \${i + 1}\`);
-    }
-
-    // Normalizar la fila pivote dividiendo entre el elemento diagonal
-    for (let j = 0; j <= n; j++) {
-      M[i][j] /= pivote;
-    }
-
-    // Hacer ceros en todas las demás filas (arriba y abajo)
-    for (let k = 0; k < n; k++) {
-      if (k !== i) {
-        const factor = M[k][i];
-        if (Math.abs(factor) > 1e-12) {
-          for (let j = 0; j <= n; j++) {
-            M[k][j] -= factor * M[i][j];
-          }
-        }
-      }
-    }
-  }
-
-  // El vector solución x se obtiene directamente de la última columna
-  return M.map(row => row[n]);
-}`;
-
-    const codeSeidel = `/**
- * MÉTODO 3: GAUSS - SEIDEL ITERATIVO (N x N)
- * Archivo: gauss-seidel.js
- *
- * Despeja cada incógnita de la diagonal principal y sustituye inmediatamente
- * los valores más recientes calculados, evaluando Ea = |(Va - Vant) / Va| * 100 <= tol.
- */
-function resolverGaussSeidel(A, b, tol = 5.0) {
-  const n = A.length;
-  let xPrev = new Array(n).fill(0);
-  let xCurr = new Array(n).fill(0);
-  let iter = 0;
-  let convergido = false;
-
-  while (iter < 100 && !convergido) {
-    iter++;
-    const ea = new Array(n).fill(0);
-
-    for (let i = 0; i < n; i++) {
-      let suma = b[i];
-      for (let j = 0; j < n; j++) {
-        if (i !== j) {
-          suma -= A[i][j] * xCurr[j];
-        }
-      }
-
-      const valNuevo = suma / A[i][i];
-
-      // Cálculo del error relativo porcentual Ea
-      if (iter > 1) {
-        ea[i] = Math.abs((valNuevo - xPrev[i]) / valNuevo) * 100;
-      }
-
-      xCurr[i] = valNuevo;
-    }
-
-    // Verificación del criterio de parada para todas las incógnitas
-    if (iter > 1) {
-      convergido = ea.every(e => e <= tol);
-    }
-
-    xPrev = [...xCurr];
-  }
-
-  return { x: xCurr, iter };
-}`;
-
-    // Desglose de iteraciones de Gauss-Seidel
-    const seidelIterations = [
-      { iter: 1, x1: 9230.77, ea1: null, x2: 6081.54, ea2: null, x3: 4007.27, ea3: null },
-      { iter: 2, x1: 4965.14, ea1: 85.91, x2: 7038.01, ea2: 13.59, x3: 4881.59, ea3: 17.91 },
-      { iter: 3, x1: 4176.93, ea1: 18.87, x2: 7161.21, ea2: 1.72, x3: 5072.35, ea3: 3.76 },
-      { iter: 4, x1: 4037.83, ea1: 3.44, x2: 7168.36, ea2: 0.10, x3: 5113.97, ea3: 0.81 }
-    ];
-
-    // Cálculos dinámicos para el simulador
-    const calcGauss = computed(() => {
-      const A = matrixA.value.map(row => [...row]);
-      const b = [...vectorB.value];
-      const n = A.length;
-      let M = A.map((row, i) => [...row, b[i]]);
-
-      for (let i = 0; i < n; i++) {
-        const p = M[i][i];
-        for (let j = i; j <= n; j++) M[i][j] /= p;
-        for (let k = i + 1; k < n; k++) {
-          const f = M[k][i];
-          for (let j = i; j <= n; j++) M[k][j] -= f * M[i][j];
-        }
-      }
-      const x = new Array(n).fill(0);
-      for (let i = n - 1; i >= 0; i--) {
-        let suma = M[i][n];
-        for (let j = i + 1; j < n; j++) suma -= M[i][j] * x[j];
-        x[i] = suma;
-      }
-      return x;
+    const activeSection=ref('portada'),menuOpen=ref(false);
+    const matrixA=ref(ORIGINAL_A.map(r=>[...r])),vectorB=ref([...ORIGINAL_B]),seidelTol=ref(5),simMethod=ref('gauss');
+    const validation=computed(()=>{
+      if(vectorB.value.some(v=>typeof v!=='number'||!Number.isFinite(v)))return 'Completa las tres demandas con números finitos.';
+      if(vectorB.value.some(v=>v<0))return 'Las demandas de materiales no pueden ser negativas.';
+      if(!Number.isFinite(seidelTol.value)||seidelTol.value<=0)return 'La tolerancia debe ser mayor que cero.';
+      return '';
     });
-
-    const calcSeidel = computed(() => {
-      const A = matrixA.value;
-      const b = vectorB.value;
-      const n = A.length;
-      const tol = seidelTol.value;
-      let xPrev = new Array(n).fill(0);
-      let xCurr = new Array(n).fill(0);
-      let iter = 0;
-      let conv = false;
-
-      while (iter < 100 && !conv) {
-        iter++;
-        const ea = new Array(n).fill(0);
-        for (let i = 0; i < n; i++) {
-          let suma = b[i];
-          for (let j = 0; j < n; j++) if (i !== j) suma -= A[i][j] * xCurr[j];
-          const val = suma / A[i][i];
-          if (iter > 1) ea[i] = Math.abs((val - xPrev[i]) / val) * 100;
-          xCurr[i] = val;
-        }
-        if (iter > 1) conv = ea.every(e => e <= tol);
-        xPrev = [...xCurr];
-      }
-      return { x: xCurr, iter };
+    const simulation=computed(()=>{
+      if(validation.value)return {error:validation.value};
+      try{return {gauss:Numerica.resolverGauss(matrixA.value,vectorB.value),jordan:Numerica.resolverGaussJordan(matrixA.value,vectorB.value),seidel:Numerica.resolverGaussSeidel(matrixA.value,vectorB.value,{tol:seidelTol.value})};}
+      catch(e){return {error:e.message};}
     });
-
-    // Cálculos reactivos de volúmenes y porcentajes para gráficas dinámicas
-    const totalVolumenCalc = computed(() => {
-      const g = calcGauss.value;
-      return g[0] + g[1] + g[2];
-    });
-
-    const maxValCalc = computed(() => {
-      const g = calcGauss.value;
-      return Math.max(...g, 1);
-    });
-
-    const pctX1 = computed(() => {
-      if (totalVolumenCalc.value <= 0) return 0;
-      return ((calcGauss.value[0] / totalVolumenCalc.value) * 100).toFixed(1);
-    });
-
-    const pctX2 = computed(() => {
-      if (totalVolumenCalc.value <= 0) return 0;
-      return ((calcGauss.value[1] / totalVolumenCalc.value) * 100).toFixed(1);
-    });
-
-    const pctX3 = computed(() => {
-      if (totalVolumenCalc.value <= 0) return 0;
-      return ((calcGauss.value[2] / totalVolumenCalc.value) * 100).toFixed(1);
-    });
-
-    // Control de Modal para Apuntes Manuscritos de Clase
-    const apunteModal = ref({
-      show: false,
-      img: '',
-      title: ''
-    });
-
-    const openApunte = (imgSrc, title) => {
-      apunteModal.value = {
-        show: true,
-        img: imgSrc,
-        title: title
-      };
-    };
-
-    const closeApunte = () => {
-      apunteModal.value.show = false;
-    };
-
-    // Control de ScrollSpy
-    const handleScroll = () => {
-      const sectionIds = [
-        'portada', 'introduccion', 'formulacion', 
-        'metodo-gauss', 'metodo-jordan', 'metodo-seidel', 
-        'simulador', 'comparativa', 'conclusion'
-      ];
-      const scrollPos = window.scrollY + 220;
-
-      for (const id of sectionIds) {
-        const el = document.getElementById(id);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPos >= top && scrollPos < top + height) {
-            activeSection.value = id;
-            break;
-          }
-        }
-      }
-    };
-
-    onMounted(() => {
-      window.addEventListener('scroll', handleScroll);
-    });
-
-    onUnmounted(() => {
-      window.removeEventListener('scroll', handleScroll);
-    });
-
-    return {
-      activeSection,
-      codeGauss,
-      codeJordan,
-      codeSeidel,
-      seidelIterations,
-      matrixA,
-      vectorB,
-      seidelTol,
-      calcGauss,
-      calcSeidel,
-      totalVolumenCalc,
-      maxValCalc,
-      pctX1,
-      pctX2,
-      pctX3,
-      apunteModal,
-      openApunte,
-      closeApunte
-    };
+    const calcGauss=computed(()=>simulation.value.gauss?.x||[0,0,0]),calcSeidel=computed(()=>simulation.value.seidel);
+    const feasible=computed(()=>!simulation.value.error&&calcGauss.value.every(v=>v>=-1e-8));
+    const totalVolumenCalc=computed(()=>calcGauss.value.reduce((s,v)=>s+v,0)),maxValCalc=computed(()=>Math.max(...calcGauss.value,1));
+    const pct=j=>computed(()=>totalVolumenCalc.value>0?f(Math.max(0,calcGauss.value[j])/totalVolumenCalc.value*100,1):'0');
+    const seidelIterations=Numerica.resolverGaussSeidel(ORIGINAL_A,ORIGINAL_B).history.map(h=>({iter:h.iter,x1:h.x[0],x2:h.x[1],x3:h.x[2],ea1:h.ea[0],ea2:h.ea[1],ea3:h.ea[2]}));
+    const codeGauss=Numerica.resolverGauss.toString()+'\n\n// Implementación común de métodos directos.\n'+Numerica.sourceDirect;
+    const codeJordan=Numerica.resolverGaussJordan.toString()+'\n\n// Implementación común de métodos directos.\n'+Numerica.sourceDirect;
+    const codeSeidel=Numerica.resolverGaussSeidel.toString();
+    const apunteModal=ref({show:false,img:'',title:''});let previousFocus;
+    const closeApunte=()=>{apunteModal.value.show=false;document.body.style.overflow='';previousFocus?.focus();};
+    const openApunte=async(img,title)=>{previousFocus=document.activeElement;apunteModal.value={show:true,img,title};document.body.style.overflow='hidden';await nextTick();document.querySelector('.apunte-modal-close').focus();};
+    const keyboard=e=>{if(!apunteModal.value.show)return;if(e.key==='Escape')closeApunte();if(e.key==='Tab'){e.preventDefault();document.querySelector('.apunte-modal-close').focus();}};
+    const reset=()=>{vectorB.value=[...ORIGINAL_B];seidelTol.value=5;};let observer;
+    onMounted(()=>{document.addEventListener('keydown',keyboard);observer=new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting)activeSection.value=e.target.id;},{rootMargin:'-15% 0px -70% 0px'});document.querySelectorAll('section[id]').forEach(el=>observer.observe(el));});
+    onUnmounted(()=>{observer?.disconnect();document.removeEventListener('keydown',keyboard);document.body.style.overflow='';});
+    return {activeSection,menuOpen,codeGauss,codeJordan,codeSeidel,seidelIterations,matrixA,vectorB,seidelTol,simMethod,originalA:ORIGINAL_A,originalB:ORIGINAL_B,simulation,validation,feasible,calcGauss,calcSeidel,totalVolumenCalc,maxValCalc,pctX1:pct(0),pctX2:pct(1),pctX3:pct(2),apunteModal,openApunte,closeApunte,reset,f};
   }
 });
-
+app.component('matrix-player',MatrixPlayer);
 app.mount('#app');

@@ -8,7 +8,7 @@
  * 
  * Estudiantes:
  * - Miguel Oliver (8-1050-1381)
- * - Juan Rodríguez (6-728-1695)
+ * - Juan Rodríguez (9-728-1695)
  * Profesora: Mariluz Centella | Grupo: 7IL121
  */
 
@@ -69,26 +69,26 @@ function ejecutarLaboratorioCanteras() {
   
   console.log("\n❓ 1. ¿Cuál método converge más rápido?");
   console.log("  ▸ Respuesta: Los métodos directos (Gauss y Gauss-Jordan) obtienen el resultado");
-  console.log("    exacto en un número fijo y determinado de pasos (operaciones matriciales directo).");
-  console.log("    Gauss-Seidel es un método iterativo que para la tolerancia asignada del 5% al canzar");
+  console.log("    en un número fijo y determinado de pasos (operaciones matriciales directo).");
+  console.log("    Gauss-Seidel es un método iterativo que para la tolerancia asignada del 5% alcanza");
   console.log(`    el criterio de parada en ${resSeidel.iterations} iteraciones. Para sistemas 3x3 pequeños, Gauss simple`);
   console.log("    requiere menor número global de operaciones aritméticas.");
 
   console.log("\n❓ 2. ¿Cuál es más preciso?");
-  console.log("  ▸ Respuesta: Los métodos directos (Gauss y Gauss-Jordan) son más precisos al no depender");
-  console.log("    de un criterio de tolerancia de detención; la precisión solo está limitada por");
-  console.log("    la aritmética de punto flotante de la máquina.");
+  console.log("  ▸ Respuesta: En este problema los métodos directos tienen un residuo cercano a cero.");
+  console.log("    La precisión depende de la aritmética, el condicionamiento y la estabilidad.");
+  console.log("    Gauss-Seidel se detiene por el cambio relativo entre iteraciones, no por el error real.");
 
   console.log("\n❓ 3. ¿Cuál es más exacto?");
-  console.log("  ▸ Respuesta: Eliminación Gaussiana y Gauss-Jordan ofrecen la solución matemática exacta");
+  console.log("  ▸ Respuesta: Eliminación Gaussiana y Gauss-Jordan aproximan la solución matemática con aritmética de punto flotante");
   console.log("    del sistema de ecuaciones simultáneas.");
 
   console.log("\n❓ 4. Respuesta a la pregunta del problema:");
   console.log("  ▸ Para cumplir con la demanda de 4,800 m³ de arena, 5,810 m³ de grava fina y 5,690 m³ de grava gruesa,");
   console.log("    el ingeniero civil debe extraer:");
-  console.log(`      • Cantera 1: ${resGauss.x[0].toFixed(2)} m³  (Exacto: ${resGauss.x[0].toFixed(4)} m³)`);
-  console.log(`      • Cantera 2: ${resGauss.x[1].toFixed(2)} m³  (Exacto: ${resGauss.x[1].toFixed(4)} m³)`);
-  console.log(`      • Cantera 3: ${resGauss.x[2].toFixed(2)} m³  (Exacto: ${resGauss.x[2].toFixed(4)} m³)`);
+  console.log(`      • Cantera 1: ${resGauss.x[0].toFixed(2)} m³  (Más cifras: ${resGauss.x[0].toFixed(4)} m³)`);
+  console.log(`      • Cantera 2: ${resGauss.x[1].toFixed(2)} m³  (Más cifras: ${resGauss.x[1].toFixed(4)} m³)`);
+  console.log(`      • Cantera 3: ${resGauss.x[2].toFixed(2)} m³  (Más cifras: ${resGauss.x[2].toFixed(4)} m³)`);
   console.log("========================================================================\n");
 }
 

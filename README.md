@@ -1,49 +1,60 @@
-# Métodos de Ecuaciones Lineales Simultáneas - Laboratorio N°2
-**Universidad Tecnológica de Panamá (UTP) - Centro Regional de Azuero**  
-**Facultad de Ingeniería de Sistemas Computacionales**  
-*Materia:* Métodos Numéricos para Ingenieros (Prof. Mariluz Centella)  
-*Estudiantes:* Miguel Oliver (8-1050-1381) • Juan Rodríguez (6-728-1695)
+# Laboratorio N.º 2 · Métodos numéricos
 
----
+Universidad Tecnológica de Panamá · Centro Regional de Azuero
 
-## 🌐 Despliegue en Vercel
-Este repositorio está optimizado para **Vercel** como aplicación web estática directa. Al acceder a la raíz del sitio se sirve inmediatamente la **presentación web interactiva** con todos sus estilos, gráficos SVG y simulador Vue 3.
+Miguel Oliver (8-1050-1381) y Juan Rodríguez (9-728-1695)
 
----
+Profesora: Mariluz Centella · Grupo: 7IL121
 
-## 📁 Estructura del Repositorio
+Presentación del problema de las tres canteras con Gauss, Gauss-Jordan y Gauss-Seidel. Se conservaron las demandas, composiciones y resultados del PDF del laboratorio.
 
-El proyecto contiene únicamente los archivos que influyen directamente en la ejecución y presentación:
+## Abrir la presentación
 
-```
-├── algoritmos/                      # Algoritmos numéricos generales (N x N) en JavaScript
-│   ├── gauss.js                     # Eliminación Gaussiana con sustitución hacia atrás
-│   ├── gauss-jordan.js              # Reducción de Gauss-Jordan a Matriz Identidad [I | x]
-│   ├── gauss-seidel.js              # Gauss-Seidel iterativo con criterio Ea <= 5%
-│   └── index.js                     # Ejecutable principal en consola con tablas formateadas
-│
-├── assets/apuntes/                  # Capturas de apuntes de clase manuscritos
-├── index.html                       # Interfaz interactiva de la presentación
-├── styles.css                       # Sistema de diseño sobrio (Paleta Obsidian & Índigo)
-├── app.js                           # Lógica reactiva en Vue 3 y simulador en vivo
-├── vercel.json                      # Configuración de URLs y redirecciones limpias
-├── package.json                     # Metadatos del proyecto y scripts
-├── .gitignore                       # Filtro de exclusión de archivos locales no esenciales
-└── README.md                        # Documentación general
+Abre `index.html` directamente o ejecuta:
+
+```sh
+npm run dev
 ```
 
----
+Visita http://127.0.0.1:4185. Vue 3.5.22 está incluido en `vendor/`, por lo que las animaciones no requieren conexión. Las fuentes externas tienen alternativas locales del sistema.
 
-## 🚀 Ejecución Local
+## Matrices animadas
 
-### 1. Ejecutar Algoritmos en Consola (Node.js)
-```bash
+Cada método incluye controles de anterior/siguiente, inicio, reproducción, pausa, repetición y velocidad. También puedes elegir cualquier paso con la barra. Con el visor enfocado, usa las flechas o la barra espaciadora.
+
+- Gauss: normalización, desplazamiento de la fila multiplicada, eliminación inferior y sustitución regresiva.
+- Gauss-Jordan: eliminación inferior y superior hasta llegar a [I | x].
+- Gauss-Seidel: actualización individual de incógnitas y distinción entre valores nuevos y anteriores. La matriz de coeficientes permanece fija.
+
+Los cuadros muestran la operación por columna. El redondeo es visual y no se utiliza en operaciones posteriores. En móvil las matrices muestran menos decimales para que se vea también la columna b. Se respeta la preferencia de movimiento reducido.
+
+## Simulador
+
+Modifica las tres demandas y la tolerancia. Compara los resultados y el máximo valor absoluto del residuo Ax − b. El visor se reinicia cuando cambian los datos.
+
+Se rechazan campos vacíos, valores no finitos, demandas negativas y tolerancias no positivas. Una solución con volúmenes negativos se identifica como físicamente inviable. Gauss-Seidel informa si alcanzó la tolerancia o el límite de 100 iteraciones. Su error aproximado mide el cambio entre iteraciones, no el error verdadero. Para un valor actual y anterior ambos cero, se define cambio cero; si solo el actual es cero, el cambio relativo se considera infinito.
+
+## Motor y consola
+
+```sh
 npm start
-```
-O directamente:
-```bash
-node algoritmos/index.js
+npm test
 ```
 
-### 2. Abrir la Presentación Web
-Abre directamente en tu navegador el archivo `index.html`.
+`algoritmos/core.js` es el motor compartido por navegador y consola; genera resultados, residuos y trazas antes/después de cada operación. Los adaptadores de `algoritmos/` conservan la interfaz de consola. Gauss y Gauss-Jordan intercambian filas cuando el pivote no es utilizable. Para exigir Gauss simple sin intercambio, pasa `{pivoting: false}`.
+
+Las pruebas numéricas comprueban la solución de referencia, operaciones de las trazas, inmutabilidad, pivotes cero, sistemas singulares, escalas pequeñas, datos inválidos, convergencia y límite de iteraciones.
+
+La prueba de navegador está en `scripts/check-ui.cjs` y requiere Playwright y Chrome. Ejecuta `node scripts/check-ui.cjs` con Playwright instalado, o configura `PLAYWRIGHT_PATH` al paquete del entorno. Inicia y termina su propio servidor en el puerto 4186. Verifica animación, pausa, navegación, entradas, modal, móvil y movimiento reducido con recursos externos bloqueados. Las capturas temporales van a `tmp/qa/`.
+
+## Estructura
+
+- `index.html`, `styles.css`, `app.js`: presentación y componente animado reutilizable.
+- `algoritmos/core.js`: cálculo y trazas de los tres métodos.
+- `algoritmos/index.js`: laboratorio en consola.
+- `assets/apuntes/`: imágenes originales de apuntes.
+- `vendor/`: Vue y su licencia MIT.
+- `tests/`, `scripts/`: verificación y servidor local.
+- `vercel.json`: configuración del sitio estático.
+
+El sitio conserva la configuración de Vercel; los cambios locales no publican automáticamente una nueva versión.
