@@ -28,9 +28,9 @@ El proyecto contiene únicamente los archivos que influyen directamente en la ej
 │   ├── app.js                       # Lógica reactiva en Vue 3 y simulador en tiempo real
 │   └── assets/                      # Capturas de apuntes de clase manuscritos
 │
-├── index.js                         # Acceso rápido en la raíz (ejecuta algoritmos/index.js)
-├── vercel.json                      # Enrutamiento automático para despliegue en Vercel
-├── package.json                     # Metadatos del proyecto y scripts
+├── index.html                       # Redirección automática inmediata a la presentación
+├── vercel.json                      # Enrutamiento y redirección en Vercel
+├── package.json                     # Metadatos del proyecto y scripts de ejecución
 ├── .gitignore                       # Filtro de exclusión de archivos no esenciales
 └── README.md                        # Documentación general
 ```
@@ -41,11 +41,11 @@ El proyecto contiene únicamente los archivos que influyen directamente en la ej
 
 ### 1. Ejecutar Algoritmos en Consola (Node.js)
 ```bash
-node index.js
+npm start
 ```
 O directamente:
 ```bash
-npm start
+node algoritmos/index.js
 ```
 
 ### 2. Abrir la Presentación Web

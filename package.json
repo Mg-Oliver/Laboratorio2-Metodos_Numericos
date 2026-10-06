@@ -2,9 +2,9 @@
   "name": "laboratorio-metodos-numericos",
   "version": "1.0.0",
   "description": "Laboratorio N°2: Métodos de Ecuaciones Lineales Simultáneas (UTP Azuero) - Gauss, Gauss-Jordan y Gauss-Seidel",
-  "main": "index.js",
+  "main": "algoritmos/index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node algoritmos/index.js",
     "calc": "node algoritmos/index.js"
   },
   "keywords": [

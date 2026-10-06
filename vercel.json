@@ -1,10 +1,6 @@
 {
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/", "destination": "/presentacion/index.html" },
-    { "source": "/styles.css", "destination": "/presentacion/styles.css" },
-    { "source": "/app.js", "destination": "/presentacion/app.js" },
-    { "source": "/assets/(.*)", "destination": "/presentacion/assets/$1" },
-    { "source": "/(.*)", "destination": "/presentacion/$1" }
+  "redirects": [
+    { "source": "/", "destination": "/presentacion", "permanent": false }
   ]
 }
