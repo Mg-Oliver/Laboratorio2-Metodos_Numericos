@@ -1,0 +1,19 @@
+{
+  "name": "laboratorio-metodos-numericos",
+  "version": "1.0.0",
+  "description": "Laboratorio N°2: Métodos de Ecuaciones Lineales Simultáneas (UTP Azuero) - Gauss, Gauss-Jordan y Gauss-Seidel",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "calc": "node algoritmos/index.js"
+  },
+  "keywords": [
+    "metodos-numericos",
+    "gauss",
+    "gauss-jordan",
+    "gauss-seidel",
+    "utp"
+  ],
+  "author": "Miguel Oliver, Juan Rodríguez",
+  "license": "MIT"
+}

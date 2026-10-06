@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentación Interactiva - Métodos de Ecuaciones Simultáneas (UTP)</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+  <div id="app">
+    <!-- Sticky Navigation Header -->
+    <nav class="header-nav">
+      <div class="nav-brand">
+        <span class="nav-logo">UTP FISC</span>
+        <span class="nav-title">Laboratorio N°2: Métodos Simultáneos</span>
+      </div>
+
+      <div class="nav-links">
+        <a href="#portada" class="nav-link" :class="{ active: activeSection === 'portada' }">Inicio</a>
+        <a href="#introduccion" class="nav-link" :class="{ active: activeSection === 'introduccion' }">Problema</a>
+        <a href="#formulacion" class="nav-link" :class="{ active: activeSection === 'formulacion' }">Formulación</a>
+        <a href="#metodo-gauss" class="nav-link" :class="{ active: activeSection === 'metodo-gauss' }">Gauss</a>
+        <a href="#metodo-jordan" class="nav-link" :class="{ active: activeSection === 'metodo-jordan' }">Gauss-Jordan</a>
+        <a href="#metodo-seidel" class="nav-link" :class="{ active: activeSection === 'metodo-seidel' }">Gauss-Seidel</a>
+        <a href="#simulador" class="nav-link" :class="{ active: activeSection === 'simulador' }">Simulador</a>
+        <a href="#comparativa" class="nav-link" :class="{ active: activeSection === 'comparativa' }">Resultados</a>
+        <a href="#conclusion" class="nav-link" :class="{ active: activeSection === 'conclusion' }">Conclusión</a>
+      </div>
+    </nav>
+
+    <div class="page-container">
+
+      <!-- ==================== 1. HERO / PORTADA ==================== -->
+      <section id="portada" class="web-section hero-section">
+        <div class="badge-pill">UNIVERSIDAD TECNOLÓGICA DE PANAMÁ • CENTRO REGIONAL DE AZUERO</div>
+        <h1 class="hero-h1">Métodos de Ecuaciones Lineales Simultáneas</h1>
+        <p class="hero-p">
+          Resolución Paso a Paso, Procedimientos Rigurosos e Implementación en JavaScript de Eliminación Gaussiana, Gauss-Jordan y Gauss-Seidel
+        </p>
+
+        <div class="author-grid">
+          <div class="author-card">
+            <strong>Miguel Oliver</strong> • Cédula: 8-1050-1381
+          </div>
+          <div class="author-card">
+            <strong>Juan Rodríguez</strong> • Cédula: 6-728-1695
+          </div>
+        </div>
+
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem;">
+          Facultad de Ingeniería de Sistemas Computacionales • Profesora: Mariluz Centella • Grupo: 7IL121
+        </p>
+
+        <a href="#introduccion" class="scroll-indicator">
+          <span>Desplaza hacia abajo para ver el procedimiento</span>
+          <span style="font-size: 1.2rem;">▼</span>
+        </a>
+      </section>
+
+      <!-- ==================== 2. ENUNCIADO DEL PROBLEMA ==================== -->
+      <section id="introduccion" class="web-section">
+        <div class="section-tag">01. Contexto del Problema</div>
+        <h2 class="section-title">Demanda Volumétrica de Materiales en Canteras</h2>
+        <p class="section-desc">
+          Un <strong>ingeniero civil</strong> requiere <strong>4,800 m³ de arena</strong>, <strong>5,810 m³ de grava fina</strong> y <strong>5,690 m³ de grava gruesa</strong> para la construcción de un proyecto. La empresa cuenta con 3 canteras de procedencia:
+        </p>
+
+        <div class="grid-3" style="margin-bottom: 2rem;">
+          <div class="card">
+            <h3>🏖️ Arena (Demanda: 4,800 m³)</h3>
+            <p>Composición porcentual de arena:</p>
+            <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• Cantera 1: <strong>52% (0.52)</strong></div>
+              <div>• Cantera 2: <strong>20% (0.20)</strong></div>
+              <div>• Cantera 3: <strong>25% (0.25)</strong></div>
+            </div>
+            <div class="composition-bar">
+              <div class="bar-segment" style="width: 52%; background: var(--accent-primary);" title="Cantera 1"></div>
+              <div class="bar-segment" style="width: 20%; background: #4f46e5;" title="Cantera 2"></div>
+              <div class="bar-segment" style="width: 25%; background: var(--accent-light);" title="Cantera 3"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>🪨 Grava Fina (Demanda: 5,810 m³)</h3>
+            <p>Composición porcentual de grava fina:</p>
+            <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• Cantera 1: <strong>30% (0.30)</strong></div>
+              <div>• Cantera 2: <strong>50% (0.50)</strong></div>
+              <div>• Cantera 3: <strong>20% (0.20)</strong></div>
+            </div>
+            <div class="composition-bar">
+              <div class="bar-segment" style="width: 30%; background: var(--accent-primary);" title="Cantera 1"></div>
+              <div class="bar-segment" style="width: 50%; background: #4f46e5;" title="Cantera 2"></div>
+              <div class="bar-segment" style="width: 20%; background: var(--accent-light);" title="Cantera 3"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>🪨 Grava Gruesa (Demanda: 5,690 m³)</h3>
+            <p>Composición porcentual de grava gruesa:</p>
+            <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• Cantera 1: <strong>18% (0.18)</strong></div>
+              <div>• Cantera 2: <strong>30% (0.30)</strong></div>
+              <div>• Cantera 3: <strong>55% (0.55)</strong></div>
+            </div>
+            <div class="composition-bar">
+              <div class="bar-segment" style="width: 18%; background: var(--accent-primary);" title="Cantera 1"></div>
+              <div class="bar-segment" style="width: 30%; background: #4f46e5;" title="Cantera 2"></div>
+              <div class="bar-segment" style="width: 55%; background: var(--accent-light);" title="Cantera 3"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Showcase Gráfico 1: Análisis Volumétrico y Composición -->
+        <div class="graphic-showcase">
+          <div class="graphic-showcase-title">
+            <span>📊 Análisis Gráfico de Demanda y Composición de Canteras</span>
+          </div>
+          <div class="graphic-showcase-subtitle">
+            Comparativa de los requerimientos de la obra civil (16,300 m³ en total) y composición intrínseca de cada cantera.
+          </div>
+
+          <div class="grid-2">
+            <!-- Gráfica A: Demandas de Obra -->
+            <div style="background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="font-size: 0.95rem; font-weight: 700; color: white; margin-bottom: 1rem;">
+                Demandas Volumétricas del Proyecto (m³)
+              </div>
+              
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">🏖️ Arena</span>
+                  <span class="bar-label-val">4,800 m³ (29.4%)</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c1" style="width: 29.4%;">4,800 m³</div>
+                </div>
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">🪨 Grava Fina</span>
+                  <span class="bar-label-val">5,810 m³ (35.6%)</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c2" style="width: 35.6%;">5,810 m³</div>
+                </div>
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">🪨 Grava Gruesa</span>
+                  <span class="bar-label-val">5,690 m³ (34.9%)</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c3" style="width: 34.9%;">5,690 m³</div>
+                </div>
+              </div>
+
+              <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-dim); text-align: right;">
+                Volumen Total Requerido: <strong>16,300.00 m³</strong>
+              </div>
+            </div>
+
+            <!-- Gráfica B: Composición 100% de cada Cantera -->
+            <div style="background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="font-size: 0.95rem; font-weight: 700; color: white; margin-bottom: 1rem;">
+                Composición Porcentual por Cantera (100%)
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">Cantera 1 (x₁)</span>
+                  <span class="bar-label-val">52% Arena | 30% G.Fina | 18% G.Gruesa</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c1" style="width: 52%;" title="52% Arena">52%</div>
+                  <div class="bar-chunk chunk-c2" style="width: 30%;" title="30% Grava Fina">30%</div>
+                  <div class="bar-chunk chunk-c3" style="width: 18%;" title="18% Grava Gruesa">18%</div>
+                </div>
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">Cantera 2 (x₂)</span>
+                  <span class="bar-label-val">20% Arena | 50% G.Fina | 30% G.Gruesa</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c1" style="width: 20%;" title="20% Arena">20%</div>
+                  <div class="bar-chunk chunk-c2" style="width: 50%;" title="50% Grava Fina">50%</div>
+                  <div class="bar-chunk chunk-c3" style="width: 30%;" title="30% Grava Gruesa">30%</div>
+                </div>
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">Cantera 3 (x₃)</span>
+                  <span class="bar-label-val">25% Arena | 20% G.Fina | 55% G.Gruesa</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c1" style="width: 25%;" title="25% Arena">25%</div>
+                  <div class="bar-chunk chunk-c2" style="width: 20%;" title="20% Grava Fina">20%</div>
+                  <div class="bar-chunk chunk-c3" style="width: 55%;" title="55% Grava Gruesa">55%</div>
+                </div>
+              </div>
+
+              <div class="chart-legend">
+                <div class="legend-item"><span class="legend-color-dot" style="background:#6366f1;"></span> Arena</div>
+                <div class="legend-item"><span class="legend-color-dot" style="background:#4338ca;"></span> Grava Fina</div>
+                <div class="legend-item"><span class="legend-color-dot" style="background:#818cf8;"></span> Grava Gruesa</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 3. FORMULACIÓN MATEMÁTICA ==================== -->
+      <section id="formulacion" class="web-section">
+        <div class="section-tag">02. Modelado Matemático</div>
+        <h2 class="section-title">Formulación del Sistema de Ecuaciones A · x = b</h2>
+        <p class="section-desc">
+          Definiendo las incógnitas <strong>x₁</strong>, <strong>x₂</strong>, <strong>x₃</strong> como los metros cúbicos ($m^3$) a extraer de la Cantera 1, Cantera 2 y Cantera 3 respectivamente:
+        </p>
+
+        <div class="grid-2" style="align-items: center; margin-bottom: 2rem;">
+          <div class="card" style="border-left: 4px solid var(--accent-primary);">
+            <h3 style="margin-bottom: 0.75rem;">Sistema de Ecuaciones Lineales</h3>
+            <div style="font-family: var(--font-mono); font-size: 1.05rem; line-height: 2.2; color: #c7d2fe;">
+              <div>0.52 x₁ + 0.20 x₂ + 0.25 x₃ = 4,800  <span style="color:var(--text-dim); font-size:0.85rem;">(Arena)</span></div>
+              <div>0.30 x₁ + 0.50 x₂ + 0.20 x₃ = 5,810  <span style="color:var(--text-dim); font-size:0.85rem;">(Grava Fina)</span></div>
+              <div>0.18 x₁ + 0.30 x₂ + 0.55 x₃ = 5,690  <span style="color:var(--text-dim); font-size:0.85rem;">(Grava Gruesa)</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Representación Matricial [A | b]</h3>
+            <div class="matrix-box" style="margin-top: 1rem;">
+              <span class="matrix-bracket">[</span>
+              <div class="matrix-grid-display">
+                <div class="matrix-cell">0.52</div><div class="matrix-cell">0.20</div><div class="matrix-cell">0.25</div>
+                <div class="matrix-sep"></div>
+                <div class="matrix-cell rhs">4800</div>
+                <div class="matrix-cell">0.30</div><div class="matrix-cell">0.50</div><div class="matrix-cell">0.20</div>
+                <div class="matrix-sep"></div>
+                <div class="matrix-cell rhs">5810</div>
+                <div class="matrix-cell">0.18</div><div class="matrix-cell">0.30</div><div class="matrix-cell">0.55</div>
+                <div class="matrix-sep"></div>
+                <div class="matrix-cell rhs">5690</div>
+              </div>
+              <span class="matrix-bracket">]</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfica de Dominancia Diagonal y Transferencia -->
+        <div class="graphic-showcase">
+          <div class="graphic-showcase-title">
+            <span>⚖️ Verificación Gráfica de la Diagonal Principal Dominante</span>
+          </div>
+          <div class="graphic-showcase-subtitle">
+            Condición matemática que garantiza la estabilidad y convergencia iterativa: |a_ii| ≥ Σ |a_ij|
+          </div>
+
+          <div class="grid-3">
+            <div class="card" style="border-top: 3px solid var(--accent-primary);">
+              <div style="font-size:0.85rem; color:var(--accent-light); font-weight:700;">FILA 1 (Arena)</div>
+              <div style="font-size:1.6rem; font-weight:800; color:white; margin:0.4rem 0;">|0.52| &gt; 0.45</div>
+              <div style="font-size:0.82rem; color:var(--text-muted);">
+                Pivote a₁₁ = 0.52 frente a (|0.20| + |0.25| = 0.45).<br>
+                <span style="color:#34d399; font-weight:600;">✔ Dominancia Estricta (+15.5%)</span>
+              </div>
+            </div>
+
+            <div class="card" style="border-top: 3px solid var(--accent-light);">
+              <div style="font-size:0.85rem; color:var(--accent-light); font-weight:700;">FILA 2 (Grava Fina)</div>
+              <div style="font-size:1.6rem; font-weight:800; color:white; margin:0.4rem 0;">|0.50| = 0.50</div>
+              <div style="font-size:0.82rem; color:var(--text-muted);">
+                Pivote a₂₂ = 0.50 frente a (|0.30| + |0.20| = 0.50).<br>
+                <span style="color:#38bdf8; font-weight:600;">✔ Dominancia Débil (Exacta)</span>
+              </div>
+            </div>
+
+            <div class="card" style="border-top: 3px solid #818cf8;">
+              <div style="font-size:0.85rem; color:var(--accent-light); font-weight:700;">FILA 3 (Grava Gruesa)</div>
+              <div style="font-size:1.6rem; font-weight:800; color:white; margin:0.4rem 0;">|0.55| &gt; 0.48</div>
+              <div style="font-size:0.82rem; color:var(--text-muted);">
+                Pivote a₃₃ = 0.55 frente a (|0.18| + |0.30| = 0.48).<br>
+                <span style="color:#34d399; font-weight:600;">✔ Dominancia Estricta (+14.6%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 4. MÉTODO 1: ELIMINACIÓN GAUSSIANA ==================== -->
+      <section id="metodo-gauss" class="web-section">
+        <div class="section-tag">03. Método 1 (Apuntes de Clase)</div>
+        <h2 class="section-title">Eliminación de Gauss (Método Simple)</h2>
+        <p class="section-desc">
+          Muestra los resultados en una matriz triangular. Procedimiento paso a paso según los apuntes de clase (Pasos 1 al 8):
+        </p>
+
+        <!-- Diagrama de Flujo del Algoritmo -->
+        <div class="flowchart-container">
+          <div class="flow-step">
+            <div class="flow-icon">1</div>
+            <div class="flow-text">
+              <span>Paso 1: Ordenar</span>
+              <span>Ec ①, ②, ③</span>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-icon">2</div>
+            <div class="flow-text">
+              <span>Paso 2: Normalizar Ec 1</span>
+              <span>Dividir entre a₁₁</span>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-icon">3-4</div>
+            <div class="flow-text">
+              <span>Pasos 3-4: Eliminar x₁</span>
+              <span>En Ec ② y Ec ③</span>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-icon">5-6</div>
+            <div class="flow-text">
+              <span>Pasos 5-6: Eliminar x₂</span>
+              <span>Despejar x₃</span>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-icon">7-8</div>
+            <div class="flow-text">
+              <span>Pasos 7-8: Sustitución</span>
+              <span>Hallar x₂ y x₁</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Procedimiento Riguroso Paso a Paso -->
+        <div class="apuntes-procedure-container">
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 1</span>
+            <div class="step-title">Ordenar las ecuaciones según el coeficiente de la primera incógnita</div>
+            <div class="step-math-box">
+              <div>① &nbsp; 0.52 x₁ + 0.20 x₂ + 0.25 x₃ = 4800</div>
+              <div>② &nbsp; 0.30 x₁ + 0.50 x₂ + 0.20 x₃ = 5810</div>
+              <div>③ &nbsp; 0.18 x₁ + 0.30 x₂ + 0.55 x₃ = 5690</div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 2</span>
+            <div class="step-title">Normalizar la primera ecuación dividiendo entre el coeficiente de su primera incógnita (0.52)</div>
+            <div class="step-math-box">
+              <div>(0.52 x₁ + 0.20 x₂ + 0.25 x₃ = 4800) / 0.52</div>
+              <div>➔ <strong>x₁ + 0.384615 x₂ + 0.480769 x₃ = 9230.7692</strong> &nbsp;&nbsp;<span class="step-note-tag">[Primera ec normalizada]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 3</span>
+            <div class="step-title">Restar la segunda ecuación con la primera normalizada para eliminar x₁</div>
+            <div class="step-math-box">
+              <div>&nbsp;&nbsp; 0.30 x₁ + 0.500000 x₂ + 0.200000 x₃ = 5810.0000</div>
+              <div>- 0.30 (x₁ + 0.384615 x₂ + 0.480769 x₃ = 9230.7692)</div>
+              <div>-------------------------------------------------------------</div>
+              <div>&nbsp;&nbsp; <strong>0 x₁ + 0.384615 x₂ + 0.055769 x₃ = 3040.7692</strong> &nbsp;&nbsp;<span class="step-note-tag">[Segunda ecuación más reciente]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 4</span>
+            <div class="step-title">Restar la tercera ecuación con la primera normalizada para eliminar x₁</div>
+            <div class="step-math-box">
+              <div>&nbsp;&nbsp; 0.18 x₁ + 0.300000 x₂ + 0.550000 x₃ = 5690.0000</div>
+              <div>- 0.18 (x₁ + 0.384615 x₂ + 0.480769 x₃ = 9230.7692)</div>
+              <div>-------------------------------------------------------------</div>
+              <div>&nbsp;&nbsp; <strong>0 x₁ + 0.230769 x₂ + 0.463462 x₃ = 4028.4615</strong> &nbsp;&nbsp;<span class="step-note-tag">[Tercera ecuación más reciente]</span></div>
+            </div>
+            <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--accent-light);">
+              <strong>Nuevo sistema de ecuaciones:</strong>
+              <div style="font-family: var(--font-mono); margin-top: 0.3rem;">
+                ① x₁ + 0.384615 x₂ + 0.480769 x₃ = 9230.7692<br>
+                ② 0 x₁ + 0.384615 x₂ + 0.055769 x₃ = 3040.7692<br>
+                ③ 0 x₁ + 0.230769 x₂ + 0.463462 x₃ = 4028.4615
+              </div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 5</span>
+            <div class="step-title">Normalizar la segunda ecuación más reciente (el coeficiente ahora sería el de x₂, dividiendo entre 0.384615)</div>
+            <div class="step-math-box">
+              <div>(0.384615 x₂ + 0.055769 x₃ = 3040.7692) / 0.384615</div>
+              <div>➔ <strong>0 x₁ + x₂ + 0.145000 x₃ = 7906.0000</strong> &nbsp;&nbsp;<span class="step-note-tag">[Segunda ec normalizada]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 6</span>
+            <div class="step-title">Restar la tercera ecuación más reciente menos la segunda ecuación normalizada con el propósito de eliminar x₂, obteniendo x₃</div>
+            <div class="step-math-box">
+              <div>&nbsp;&nbsp; 0.230769 x₂ + 0.463462 x₃ = 4028.4615</div>
+              <div>- 0.230769 (x₂ + 0.145000 x₃ = 7906.0000)</div>
+              <div>-------------------------------------------------------------</div>
+              <div>&nbsp;&nbsp; 0 x₂ + 0.430000 x₃ = 2204.0000</div>
+              <div>Despejando x₃: &nbsp; x₃ = 2204.0000 / 0.430000 = <strong>5,125.5814 m³</strong></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 7</span>
+            <div class="step-title">Reemplazar x₃ en la segunda ecuación más reciente para encontrar x₂</div>
+            <div class="step-math-box">
+              <div>x₂ + 0.145000 (5125.5814) = 7906.0000</div>
+              <div>x₂ + 743.2093 = 7906.0000</div>
+              <div>x₂ = 7906.0000 - 743.2093 = <strong>7,162.7907 m³</strong></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 8</span>
+            <div class="step-title">Reemplazar x₂ y x₃ en la primera ecuación normalizada para encontrar x₁ (obteniendo los 3 valores)</div>
+            <div class="step-math-box">
+              <div>x₁ + 0.384615 (7162.7907) + 0.480769 (5125.5814) = 9230.7692</div>
+              <div>x₁ + 2754.9195 + 2464.2185 = 9230.7692</div>
+              <div>x₁ = 9230.7692 - 5219.1380 = <strong>4,011.6312 m³</strong> (≈ 4,011.6279 m³)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Showcase Gráfico: Evolución de la Triangulación Gaussiana -->
+        <div class="graphic-showcase">
+          <div class="graphic-showcase-title">
+            <span>📐 Evolución Matricial: Proceso de Triangulación Superior</span>
+          </div>
+          <div class="graphic-showcase-subtitle">
+            Representación visual del estado del sistema matricial [A | b] a medida que se ejecutan los pivotes y eliminaciones:
+          </div>
+
+          <div class="matrix-evolution-grid">
+            <!-- Estado 1 -->
+            <div class="matrix-evolution-card">
+              <div class="matrix-step-badge">Estado 1: Sistema Original</div>
+              <div class="matrix-micro-box">
+                <span class="micro-cell pivot">0.52</span><span class="micro-cell">0.20</span><span class="micro-cell">0.25</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">4800</span>
+                <span class="micro-cell">0.30</span><span class="micro-cell">0.50</span><span class="micro-cell">0.20</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">5810</span>
+                <span class="micro-cell">0.18</span><span class="micro-cell">0.30</span><span class="micro-cell">0.55</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">5690</span>
+              </div>
+              <div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">
+                Fila 1 pivote. Elementos inferiores listos para eliminación.
+              </div>
+            </div>
+
+            <!-- Estado 2 -->
+            <div class="matrix-evolution-card">
+              <div class="matrix-step-badge">Estado 2: Eliminación x₁ (Pasos 2-4)</div>
+              <div class="matrix-micro-box">
+                <span class="micro-cell pivot">1.00</span><span class="micro-cell">0.38</span><span class="micro-cell">0.48</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">9230</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell pivot">0.38</span><span class="micro-cell">0.06</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">3040</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell">0.23</span><span class="micro-cell">0.46</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">4028</span>
+              </div>
+              <div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">
+                Columna 1 anulada bajo el pivote. Fila 2 pasa a ser pivote.
+              </div>
+            </div>
+
+            <!-- Estado 3 -->
+            <div class="matrix-evolution-card active">
+              <div class="matrix-step-badge" style="color:#818cf8;">Estado 3: Triangular Superior (Pasos 5-6)</div>
+              <div class="matrix-micro-box">
+                <span class="micro-cell pivot">1.00</span><span class="micro-cell">0.38</span><span class="micro-cell">0.48</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">9230</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell pivot">1.00</span><span class="micro-cell">0.15</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">7906</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell zeroed">0.00</span><span class="micro-cell pivot">0.43</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">2204</span>
+              </div>
+              <div style="font-size:0.75rem; color:#818cf8; margin-top:0.5rem;">
+                ✔ Triangulación completa. Lista para sustitución regresiva.
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+            <button class="apunte-btn" @click="openApunte('assets/apuntes/page_2_img_1.png', 'Apuntes Oficiales: Eliminación de Gauss (Pasos 1 al 6)')">
+              📖 Ver Apunte de Clase Manuscrito (Pasos 1 a 6)
+            </button>
+            <button class="apunte-btn" @click="openApunte('assets/apuntes/page_3_img_1.png', 'Apuntes Oficiales: Eliminación de Gauss (Pasos 7 y 8)')">
+              📖 Ver Apunte de Clase Manuscrito (Pasos 7 y 8)
+            </button>
+          </div>
+        </div>
+
+        <!-- Código Fuente Completo en JavaScript (Caja Ampliada sin Scroll Horizontal) -->
+        <div class="wide-code-box">
+          <div class="code-header-bar">
+            <span><strong>CÓDIGO FUENTE:</strong> gauss.js (Eliminación Gaussiana)</span>
+            <span>JavaScript (Node.js & Web)</span>
+          </div>
+          <pre><code>{{ codeGauss }}</code></pre>
+        </div>
+      </section>
+
+      <!-- ==================== 5. MÉTODO 2: GAUSS - JORDAN ==================== -->
+      <section id="metodo-jordan" class="web-section">
+        <div class="section-tag">04. Método 2 (Apuntes de Clase)</div>
+        <h2 class="section-title">Método Gauss Jordan</h2>
+        <p class="section-desc">
+          Se trabaja con una matriz identidad para encontrar las soluciones. Pasos a seguir en el método (Pasos 1 al 10):
+        </p>
+
+        <!-- Diagrama de Flujo del Algoritmo -->
+        <div class="flowchart-container">
+          <div class="flow-step">
+            <div class="flow-icon">1-2</div>
+            <div class="flow-text">
+              <span>Pivote 1</span>
+              <span>Norm F1</span>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-icon">3-4</div>
+            <div class="flow-text">
+              <span>Eliminar x₁</span>
+              <span>En F2 y F3</span>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-icon">5-7</div>
+            <div class="flow-text">
+              <span>Pivote 2</span>
+              <span>Norm F2 y Elim F1, F3</span>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-icon">8-10</div>
+            <div class="flow-text">
+              <span>Pivote 3</span>
+              <span>Norm F3 y Elim F1, F2</span>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-icon">★</div>
+            <div class="flow-text">
+              <span>Matriz Identidad</span>
+              <span>Solución directa [I | x]</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Procedimiento Riguroso Paso a Paso -->
+        <div class="apuntes-procedure-container">
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 1</span>
+            <div class="step-title">Expresar los coeficientes como una matriz aumentada</div>
+            <div class="step-math-box">
+              <div>[ 0.52 &nbsp; 0.20 &nbsp; 0.25 | 4800 ] &nbsp; ①</div>
+              <div>[ 0.30 &nbsp; 0.50 &nbsp; 0.20 | 5810 ] &nbsp; ②</div>
+              <div>[ 0.18 &nbsp; 0.30 &nbsp; 0.55 | 5690 ] &nbsp; ③</div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 2</span>
+            <div class="step-title">Normalizar la primera ecuación dividiendo Fila 1 entre 0.52</div>
+            <div class="step-math-box">
+              <div>[ 1.000000 &nbsp; 0.384615 &nbsp; 0.480769 | 9230.7692 ] &nbsp;&nbsp;<span class="step-note-tag">[Primera Normalizada]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 3</span>
+            <div class="step-title">Eliminar la segunda ecuación con la primera ecuación normalizada para eliminar x₁</div>
+            <div class="step-math-box">
+              <div>Fila 2 = Fila 2 - 0.30 × Fila 1_norm</div>
+              <div>➔ [ 0.000000 &nbsp; 0.384615 &nbsp; 0.055769 | 3040.7692 ] &nbsp;&nbsp;<span class="step-note-tag">[Segunda ec]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 4</span>
+            <div class="step-title">Eliminar la tercera ecuación con la primera ecuación normalizada para eliminar x₁</div>
+            <div class="step-math-box">
+              <div>Fila 3 = Fila 3 - 0.18 × Fila 1_norm</div>
+              <div>➔ [ 0.000000 &nbsp; 0.230769 &nbsp; 0.463462 | 4028.4615 ] &nbsp;&nbsp;<span class="step-note-tag">[Tercera ec]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 5</span>
+            <div class="step-title">Normalizar la segunda ecuación dividiendo Fila 2 entre 0.384615</div>
+            <div class="step-math-box">
+              <div>➔ [ 0.000000 &nbsp; 1.000000 &nbsp; 0.145000 | 7906.0000 ] &nbsp;&nbsp;<span class="step-note-tag">[Segunda Normalizada]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 6</span>
+            <div class="step-title">Eliminar x₂ de la primera ecuación con la segunda ecuación normalizada</div>
+            <div class="step-math-box">
+              <div>Fila 1 = Fila 1 - 0.384615 × Fila 2_norm</div>
+              <div>Coeficiente x₃: 0.480769 - 0.384615 × 0.145000 = 0.425000</div>
+              <div>Término independiente: 9230.7692 - 0.384615 × 7906.0000 = 6190.0000</div>
+              <div>➔ [ 1.000000 &nbsp; 0.000000 &nbsp; 0.425000 | 6190.0000 ] &nbsp;&nbsp;<span class="step-note-tag">[Primera ec]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 7</span>
+            <div class="step-title">Eliminar x₂ de la tercera ecuación con la segunda ecuación normalizada</div>
+            <div class="step-math-box">
+              <div>Fila 3 = Fila 3 - 0.230769 × Fila 2_norm</div>
+              <div>Coeficiente x₃: 0.463462 - 0.230769 × 0.145000 = 0.430000</div>
+              <div>Término independiente: 4028.4615 - 0.230769 × 7906.0000 = 2204.0000</div>
+              <div>➔ [ 0.000000 &nbsp; 0.000000 &nbsp; 0.430000 | 2204.0000 ] &nbsp;&nbsp;<span class="step-note-tag">[Tercera ec]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 8</span>
+            <div class="step-title">Normalizar la tercera ecuación más reciente dividiendo Fila 3 entre 0.430000</div>
+            <div class="step-math-box">
+              <div>2204.0000 / 0.430000 = 5125.5814</div>
+              <div>➔ [ 0.000000 &nbsp; 0.000000 &nbsp; 1.000000 | 5125.5814 ] &nbsp;&nbsp;<span class="step-note-tag">[Tercera Normalizada]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 9</span>
+            <div class="step-title">Eliminar x₃ de la primera ecuación con la tercera ecuación normalizada</div>
+            <div class="step-math-box">
+              <div>Fila 1 = Fila 1 - 0.425000 × Fila 3_norm</div>
+              <div>Término independiente: 6190.0000 - 0.425000 × 5125.5814 = 4011.6279</div>
+              <div>➔ [ 1.000000 &nbsp; 0.000000 &nbsp; 0.000000 | <strong>4011.6279</strong> ] &nbsp;&nbsp;<span class="step-note-tag">[Primera ec]</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 10</span>
+            <div class="step-title">Eliminar x₃ de la segunda ecuación con la tercera normalizada (obteniendo la Matriz Identidad)</div>
+            <div class="step-math-box">
+              <div>Fila 2 = Fila 2 - 0.145000 × Fila 3_norm</div>
+              <div>Término independiente: 7906.0000 - 0.145000 × 5125.5814 = 7162.7907</div>
+              <div>➔ [ 0.000000 &nbsp; 1.000000 &nbsp; 0.000000 | <strong>7162.7907</strong> ] &nbsp;&nbsp;<span class="step-note-tag">[Segunda ec]</span></div>
+              <div style="margin-top: 0.8rem; color: #a5b4fc; font-weight: bold;">
+                Matriz Identidad Final [I | x]:<br>
+                [ 1 &nbsp; 0 &nbsp; 0 | 4,011.6279 m³ ] ➔ x₁ = 4,011.63 m³<br>
+                [ 0 &nbsp; 1 &nbsp; 0 | 7,162.7907 m³ ] ➔ x₂ = 7,162.79 m³<br>
+                [ 0 &nbsp; 0 &nbsp; 1 | 5,125.5814 m³ ] ➔ x₃ = 5,125.58 m³
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Showcase Gráfico: Evolución hacia la Matriz Identidad -->
+        <div class="graphic-showcase">
+          <div class="graphic-showcase-title">
+            <span>✨ Reducción Total a la Matriz Identidad [I | x]</span>
+          </div>
+          <div class="graphic-showcase-subtitle">
+            A diferencia de Gauss simple, Gauss-Jordan elimina simultáneamente los elementos superiores e inferiores en cada pivote:
+          </div>
+
+          <div class="matrix-evolution-grid">
+            <!-- Estado 1 -->
+            <div class="matrix-evolution-card">
+              <div class="matrix-step-badge">Pivote 1 (Pasos 1-4)</div>
+              <div class="matrix-micro-box">
+                <span class="micro-cell pivot">1.00</span><span class="micro-cell">0.38</span><span class="micro-cell">0.48</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">9230</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell">0.38</span><span class="micro-cell">0.06</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">3040</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell">0.23</span><span class="micro-cell">0.46</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">4028</span>
+              </div>
+              <div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">
+                Columna 1 reducida a forma canónica [1, 0, 0]ᵀ.
+              </div>
+            </div>
+
+            <!-- Estado 2 -->
+            <div class="matrix-evolution-card">
+              <div class="matrix-step-badge">Pivote 2 (Pasos 5-7)</div>
+              <div class="matrix-micro-box">
+                <span class="micro-cell pivot">1.00</span><span class="micro-cell zeroed">0.00</span><span class="micro-cell">0.42</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">6190</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell pivot">1.00</span><span class="micro-cell">0.15</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">7906</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell zeroed">0.00</span><span class="micro-cell">0.43</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">2204</span>
+              </div>
+              <div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">
+                Columna 2 reducida eliminando arriba en F1 y abajo en F3.
+              </div>
+            </div>
+
+            <!-- Estado 3 -->
+            <div class="matrix-evolution-card active">
+              <div class="matrix-step-badge" style="color:#818cf8;">Pivote 3 ➔ Identidad (Pasos 8-10)</div>
+              <div class="matrix-micro-box">
+                <span class="micro-cell pivot">1.00</span><span class="micro-cell zeroed">0.00</span><span class="micro-cell zeroed">0.00</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">4011.63</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell pivot">1.00</span><span class="micro-cell zeroed">0.00</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">7162.79</span>
+                <span class="micro-cell zeroed">0.00</span><span class="micro-cell zeroed">0.00</span><span class="micro-cell pivot">1.00</span>
+                <span class="micro-sep"></span><span class="micro-cell rhs">5125.58</span>
+              </div>
+              <div style="font-size:0.75rem; color:#818cf8; margin-top:0.5rem;">
+                ✔ Matriz Identidad alcanzada. Solución directa leída en el vector derecho.
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <button class="apunte-btn" @click="openApunte('assets/apuntes/page_4_img_1.png', 'Apuntes Oficiales: Método Gauss - Jordan (Pasos 1 al 10)')">
+              📖 Ver Apunte de Clase Manuscrito (Gauss - Jordan)
+            </button>
+          </div>
+        </div>
+
+        <!-- Código Fuente Completo en JavaScript (Caja Ampliada sin Scroll Horizontal) -->
+        <div class="wide-code-box">
+          <div class="code-header-bar">
+            <span><strong>CÓDIGO FUENTE:</strong> gauss-jordan.js (Gauss - Jordan)</span>
+            <span>JavaScript (Node.js & Web)</span>
+          </div>
+          <pre><code>{{ codeJordan }}</code></pre>
+        </div>
+      </section>
+
+      <!-- ==================== 6. MÉTODO 3: GAUSS - SEIDEL ==================== -->
+      <section id="metodo-seidel" class="web-section">
+        <div class="section-tag">05. Método 3 (Apuntes de Clase)</div>
+        <h2 class="section-title">Gauss Seidel</h2>
+        <p class="section-desc">
+          En los dos primeros métodos el error se trabaja a medida de un error normalizado. En Gauss Seidel sí se utilizará la fórmula de error: 
+          <strong>Ea = |(Va - Vant) / Va| * 100</strong>. Pasos a seguir en el método (Pasos 1 al 9):
+        </p>
+
+        <!-- Procedimiento Riguroso Paso a Paso -->
+        <div class="apuntes-procedure-container">
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 1</span>
+            <div class="step-title">Ordenar la ecuación y verificar la diagonal principal dominante</div>
+            <div class="step-math-box">
+              <div>0.52 x₁ + 0.20 x₂ + 0.25 x₃ = 4800 &nbsp;&nbsp; |0.52| &gt; |0.20| + |0.25| = 0.45 ✔ (Dominante)</div>
+              <div>0.30 x₁ + 0.50 x₂ + 0.20 x₃ = 5810 &nbsp;&nbsp; |0.50| = |0.30| + |0.20| = 0.50 ✔ (Dominante débil)</div>
+              <div>0.18 x₁ + 0.30 x₂ + 0.55 x₃ = 5690 &nbsp;&nbsp; |0.55| &gt; |0.18| + |0.30| = 0.48 ✔ (Dominante)</div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 2</span>
+            <div class="step-title">Despejar X₁ de la primera ecuación</div>
+            <div class="step-math-box">
+              <div><strong>X₁ = (4800 - 0.20 X₂ - 0.25 X₃) / 0.52</strong> &nbsp;&nbsp;<span class="step-note-tag">(I)</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 3</span>
+            <div class="step-title">Despejar X₂ de la segunda ecuación</div>
+            <div class="step-math-box">
+              <div><strong>X₂ = (5810 - 0.30 X₁ - 0.20 X₃) / 0.50</strong> &nbsp;&nbsp;<span class="step-note-tag">(II)</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 4</span>
+            <div class="step-title">Despejar X₃ de la tercera ecuación</div>
+            <div class="step-math-box">
+              <div><strong>X₃ = (5690 - 0.18 X₁ - 0.30 X₂) / 0.55</strong> &nbsp;&nbsp;<span class="step-note-tag">(III)</span></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 5</span>
+            <div class="step-title">Asumir que X₂ y X₃ = 0 en la primera ecuación (Iteración 1)</div>
+            <div class="step-math-box">
+              <div>X₁ = (4800 - 0.20(0) - 0.25(0)) / 0.52 = 4800 / 0.52 = <strong>9,230.7692</strong></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 6</span>
+            <div class="step-title">Reemplazar X₁ en la segunda ecuación y asumir que X₃ = 0</div>
+            <div class="step-math-box">
+              <div>X₂ = (5810 - 0.30(9230.7692) - 0.20(0)) / 0.50 = (5810 - 2769.2308) / 0.50 = <strong>6,081.5385</strong></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 7</span>
+            <div class="step-title">Reemplazar X₁ y X₂ en la tercera ecuación</div>
+            <div class="step-math-box">
+              <div>X₃ = (5690 - 0.18(9230.7692) - 0.30(6081.5385)) / 0.55</div>
+              <div>X₃ = (5690 - 1661.5385 - 1824.4615) / 0.55 = 2204.0 / 0.55 = <strong>4,007.2727</strong></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 8</span>
+            <div class="step-title">Reemplazar X₁, X₂ y X₃ en las ecuaciones nuevamente (Iteración 2)</div>
+            <div class="step-math-box">
+              <div>X₁ = [4800 - 0.20(6081.5385) - 0.25(4007.2727)] / 0.52 = 2581.8741 / 0.52 = <strong>4,965.1425</strong></div>
+              <div>X₂ = [5810 - 0.30(4965.1425) - 0.20(4007.2727)] / 0.50 = 3519.0027 / 0.50 = <strong>7,038.0054</strong></div>
+              <div>X₃ = [5690 - 0.18(4965.1425) - 0.30(7038.0054)] / 0.55 = 2684.8727 / 0.55 = <strong>4,881.5868</strong></div>
+            </div>
+          </div>
+
+          <div class="apuntes-step">
+            <span class="step-num-badge">Paso 9</span>
+            <div class="step-title">Verificar el error en cada incógnita (Ea = |(Va - Vant) / Va| * 100)</div>
+            <div class="step-math-box">
+              <div>Ea(x₁) = |(4965.1425 - 9230.7692) / 4965.1425| × 100% = <strong>85.91%</strong></div>
+              <div>Ea(x₂) = |(7038.0054 - 6081.5385) / 7038.0054| × 100% = <strong>13.59%</strong></div>
+              <div>Ea(x₃) = |(4881.5868 - 4007.2727) / 4881.5868| × 100% = <strong>17.91%</strong></div>
+              <div style="margin-top: 0.6rem; color: #f87171;">
+                <em>"Como Ea &gt; Es (5%), entonces debemos iterar de nuevo. Pero empezamos directo en el paso 8..."</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla Completa y Gráfico de Convergencia -->
+        <div class="grid-2" style="margin-bottom: 2rem;">
+          <div class="card">
+            <h3>Tabla Completa de Iteraciones (Criterio Ea ≤ 5%)</h3>
+            <table class="web-table" style="font-size: 0.88rem; margin-top: 0.8rem;">
+              <thead>
+                <tr>
+                  <th>Iter</th>
+                  <th>x₁ (m³)</th>
+                  <th>Ea₁</th>
+                  <th>x₂ (m³)</th>
+                  <th>Ea₂</th>
+                  <th>x₃ (m³)</th>
+                  <th>Ea₃</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="it in seidelIterations" :key="it.iter" :style="it.iter === 4 ? 'background: rgba(99, 102, 241, 0.15); font-weight: bold;' : ''">
+                  <td>{{ it.iter }}</td>
+                  <td>{{ it.x1.toFixed(2) }}</td>
+                  <td :style="it.ea1 && it.ea1 <= 5 ? 'color: var(--accent-light);' : ''">{{ it.ea1 ? it.ea1.toFixed(2) + '%' : '-' }}</td>
+                  <td>{{ it.x2.toFixed(2) }}</td>
+                  <td :style="it.ea2 && it.ea2 <= 5 ? 'color: var(--accent-light);' : ''">{{ it.ea2 ? it.ea2.toFixed(2) + '%' : '-' }}</td>
+                  <td>{{ it.x3.toFixed(2) }}</td>
+                  <td :style="it.ea3 && it.ea3 <= 5 ? 'color: var(--accent-light);' : ''">{{ it.ea3 ? it.ea3.toFixed(2) + '%' : '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--accent-light);">
+              ✔ En la <strong>Iteración 4</strong> todos los errores son menores al 5% (Ea₁=3.44%, Ea₂=0.10%, Ea₃=0.81%), cumpliendo el criterio de parada.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Gráficos de Convergencia Multivariable y Error</h3>
+            <div class="chart-container" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              
+              <!-- Gráfico 1: Evolución de las 3 incógnitas -->
+              <div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">
+                  📈 Trayectoria de las Incógnitas (x₁, x₂, x₃) por Iteración
+                </div>
+                <svg class="chart-svg" viewBox="0 0 480 180" style="height: 180px;">
+                  <line x1="50" y1="20" x2="50" y2="150" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                  <line x1="50" y1="150" x2="450" y2="150" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                  
+                  <!-- Ejes y Grid -->
+                  <text x="15" y="30" fill="var(--text-dim)" font-size="9" font-family="monospace">9500</text>
+                  <text x="15" y="85" fill="var(--text-dim)" font-size="9" font-family="monospace">6500</text>
+                  <text x="15" y="145" fill="var(--text-dim)" font-size="9" font-family="monospace">3500</text>
+                  
+                  <!-- x1 (Descendiendo de 9230 a 4037) - Color: Índigo Primario #6366f1 -->
+                  <path d="M 80 25 L 180 110 L 290 128 L 400 132" fill="none" stroke="#6366f1" stroke-width="2.5"/>
+                  <circle cx="80" cy="25" r="4" fill="#6366f1"/>
+                  <circle cx="180" cy="110" r="4" fill="#6366f1"/>
+                  <circle cx="290" cy="128" r="4" fill="#6366f1"/>
+                  <circle cx="400" cy="132" r="4" fill="#6366f1"/>
+                  <text x="405" y="132" fill="#6366f1" font-size="10" font-weight="bold">x₁: 4037.83</text>
+
+                  <!-- x2 (Ascendiendo de 6081 a 7168) - Color: Púrpura #a855f7 -->
+                  <path d="M 80 92 L 180 72 L 290 69 L 400 68" fill="none" stroke="#a855f7" stroke-width="2.5"/>
+                  <circle cx="80" cy="92" r="4" fill="#a855f7"/>
+                  <circle cx="180" cy="72" r="4" fill="#a855f7"/>
+                  <circle cx="290" cy="69" r="4" fill="#a855f7"/>
+                  <circle cx="400" cy="68" r="4" fill="#a855f7"/>
+                  <text x="405" y="68" fill="#a855f7" font-size="10" font-weight="bold">x₂: 7168.36</text>
+
+                  <!-- x3 (Ascendiendo de 4007 a 5113) - Color: Cyan #38bdf8 -->
+                  <path d="M 80 133 L 180 113 L 290 108 L 400 106" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+                  <circle cx="80" cy="133" r="4" fill="#38bdf8"/>
+                  <circle cx="180" cy="113" r="4" fill="#38bdf8"/>
+                  <circle cx="290" cy="108" r="4" fill="#38bdf8"/>
+                  <circle cx="400" cy="106" r="4" fill="#38bdf8"/>
+                  <text x="405" y="106" fill="#38bdf8" font-size="10" font-weight="bold">x₃: 5113.97</text>
+
+                  <!-- Etiquetas X -->
+                  <text x="75" y="165" fill="var(--text-dim)" font-size="10">Iter 1</text>
+                  <text x="175" y="165" fill="var(--text-dim)" font-size="10">Iter 2</text>
+                  <text x="285" y="165" fill="var(--text-dim)" font-size="10">Iter 3</text>
+                  <text x="395" y="165" fill="var(--text-dim)" font-size="10">Iter 4</text>
+                </svg>
+              </div>
+
+              <!-- Gráfico 2: Error relativo Ea vs 5% -->
+              <div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">
+                  📉 Reducción del Error Ea(x₁) hasta el Criterio de Parada (≤ 5%)
+                </div>
+                <svg class="chart-svg" viewBox="0 0 480 140" style="height: 140px;">
+                  <line x1="50" y1="15" x2="50" y2="120" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                  <line x1="50" y1="120" x2="450" y2="120" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                  
+                  <!-- Umbral 5% -->
+                  <line x1="50" y1="113" x2="450" y2="113" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4"/>
+                  <text x="385" y="108" fill="#f87171" font-size="9" font-family="monospace">Umbral 5%</text>
+
+                  <!-- Curva Error -->
+                  <path d="M 120 25 L 260 98 L 400 115" fill="none" stroke="#818cf8" stroke-width="2.5"/>
+                  <circle cx="120" cy="25" r="4" fill="white" stroke="#818cf8" stroke-width="2"/>
+                  <text x="125" y="23" fill="white" font-size="10" font-family="monospace">85.91%</text>
+
+                  <circle cx="260" cy="98" r="4" fill="white" stroke="#818cf8" stroke-width="2"/>
+                  <text x="265" y="94" fill="white" font-size="10" font-family="monospace">18.87%</text>
+
+                  <circle cx="400" cy="115" r="4" fill="#34d399" stroke="white" stroke-width="2"/>
+                  <text x="375" y="132" fill="#34d399" font-size="10" font-weight="bold" font-family="monospace">3.44% (Convergido)</text>
+
+                  <text x="110" y="135" fill="var(--text-dim)" font-size="10">Iter 2</text>
+                  <text x="250" y="135" fill="var(--text-dim)" font-size="10">Iter 3</text>
+                  <text x="390" y="135" fill="var(--text-dim)" font-size="10">Iter 4</text>
+                </svg>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+          <button class="apunte-btn" @click="openApunte('assets/apuntes/page_5_img_1.png', 'Apuntes Oficiales: Gauss - Seidel (Pasos 1 al 7)')">
+            📖 Ver Apunte de Clase Manuscrito (Pasos 1 a 7)
+          </button>
+          <button class="apunte-btn" @click="openApunte('assets/apuntes/page_6_img_1.png', 'Apuntes Oficiales: Gauss - Seidel (Pasos 8 y 9 - Iteraciones)')">
+            📖 Ver Apunte de Clase Manuscrito (Iteraciones y Errores)
+          </button>
+        </div>
+
+        <!-- Código Fuente Completo en JavaScript (Caja Ampliada sin Scroll Horizontal) -->
+        <div class="wide-code-box">
+          <div class="code-header-bar">
+            <span><strong>CÓDIGO FUENTE:</strong> gauss-seidel.js (Gauss - Seidel al 5%)</span>
+            <span>JavaScript (Node.js & Web)</span>
+          </div>
+          <pre><code>{{ codeSeidel }}</code></pre>
+        </div>
+      </section>
+
+      <!-- ==================== 7. SIMULADOR INTERACTIVO VUE ==================== -->
+      <section id="simulador" class="web-section">
+        <div class="section-tag">06. Demostración en Tiempo Real</div>
+        <h2 class="section-title">Simulador Numérico Reactivo con Vue 3</h2>
+        <p class="section-desc">
+          Modifica los requerimientos volumétricos $b$ para verificar cómo los algoritmos en JavaScript recalculan dinámicamente las soluciones:
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="margin-bottom: 1.2rem;">Vector de Demandas Volumétricas (b)</h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <div class="sim-input-group">
+                <label>Demanda de Arena (m³):</label>
+                <input type="number" v-model.number="vectorB[0]" class="sim-control">
+              </div>
+              <div class="sim-input-group">
+                <label>Demanda de Grava Fina (m³):</label>
+                <input type="number" v-model.number="vectorB[1]" class="sim-control">
+              </div>
+              <div class="sim-input-group">
+                <label>Demanda de Grava Gruesa (m³):</label>
+                <input type="number" v-model.number="vectorB[2]" class="sim-control">
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="border-color: var(--accent-primary);">
+            <h3 style="color: var(--accent-light); margin-bottom: 1.2rem;">Resultado Recalculado en Vivo</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; font-family: var(--font-mono);">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
+                <span>x₁ (Cantera 1):</span>
+                <strong style="color: white; font-size: 1.25rem;">{{ calcGauss[0].toFixed(2) }} m³</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
+                <span>x₂ (Cantera 2):</span>
+                <strong style="color: white; font-size: 1.25rem;">{{ calcGauss[1].toFixed(2) }} m³</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
+                <span>x₃ (Cantera 3):</span>
+                <strong style="color: white; font-size: 1.25rem;">{{ calcGauss[2].toFixed(2) }} m³</strong>
+              </div>
+            </div>
+
+            <!-- Gráfico Reactivo de Barras en Tiempo Real -->
+            <div class="sim-chart-container">
+              <div style="font-size: 0.82rem; font-weight: 700; color: white; margin-bottom: 0.2rem;">
+                📊 Distribución Volumétrica Reactiva
+              </div>
+
+              <div class="sim-bar-item">
+                <div class="sim-bar-header">
+                  <span>Cantera 1 (x₁)</span>
+                  <span><strong>{{ calcGauss[0].toFixed(2) }} m³</strong> ({{ pctX1 }}%)</span>
+                </div>
+                <div class="sim-bar-track">
+                  <div class="sim-bar-fill chunk-c1" :style="{ width: ((calcGauss[0] / maxValCalc) * 100) + '%' }"></div>
+                </div>
+              </div>
+
+              <div class="sim-bar-item">
+                <div class="sim-bar-header">
+                  <span>Cantera 2 (x₂)</span>
+                  <span><strong>{{ calcGauss[1].toFixed(2) }} m³</strong> ({{ pctX2 }}%)</span>
+                </div>
+                <div class="sim-bar-track">
+                  <div class="sim-bar-fill chunk-c2" :style="{ width: ((calcGauss[1] / maxValCalc) * 100) + '%' }"></div>
+                </div>
+              </div>
+
+              <div class="sim-bar-item">
+                <div class="sim-bar-header">
+                  <span>Cantera 3 (x₃)</span>
+                  <span><strong>{{ calcGauss[2].toFixed(2) }} m³</strong> ({{ pctX3 }}%)</span>
+                </div>
+                <div class="sim-bar-track">
+                  <div class="sim-bar-fill chunk-c3" :style="{ width: ((calcGauss[2] / maxValCalc) * 100) + '%' }"></div>
+                </div>
+              </div>
+
+              <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-dim); text-align: right;">
+                Volumen Total Extraído: <strong style="color:white;">{{ totalVolumenCalc.toFixed(2) }} m³</strong>
+              </div>
+            </div>
+
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-dim);">
+              Gauss-Seidel converge con esta configuración en <strong>{{ calcSeidel.iter }} iteraciones</strong> (Ea ≤ 5%).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 8. CUADRO COMPARATIVO ==================== -->
+      <section id="comparativa" class="web-section">
+        <div class="section-tag">07. Resultados Consolidados</div>
+        <h2 class="section-title">Cuadro Comparativo de los Tres Métodos</h2>
+        <p class="section-desc">
+          Comparación directa de los valores de extracción por cantera obtenidos mediante cada uno de los métodos programados:
+        </p>
+
+        <table class="web-table">
+          <thead>
+            <tr>
+              <th>Método Aplicado</th>
+              <th>x₁ (Cantera 1)</th>
+              <th>x₂ (Cantera 2)</th>
+              <th>x₃ (Cantera 3)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Eliminación de Gauss</strong></td>
+              <td>4,011.63 m³</td>
+              <td>7,162.79 m³</td>
+              <td>5,125.58 m³</td>
+            </tr>
+            <tr>
+              <td><strong>2. Gauss - Jordan</strong></td>
+              <td>4,011.63 m³</td>
+              <td>7,162.79 m³</td>
+              <td>5,125.58 m³</td>
+            </tr>
+            <tr style="background: rgba(99, 102, 241, 0.08);">
+              <td><strong>3. Gauss - Seidel (Iteración 4, 5%)</strong></td>
+              <td>4,037.83 m³</td>
+              <td>7,168.36 m³</td>
+              <td>5,113.97 m³</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Gráfico Comparativo SVG de los Tres Métodos -->
+        <div class="graphic-showcase">
+          <div class="graphic-showcase-title">
+            <span>📊 Contraste Visual de Resultados entre Métodos</span>
+          </div>
+          <div class="graphic-showcase-subtitle">
+            Comparativa de barras agrupadas: Gauss vs Gauss-Jordan (solución exacta) frente a Gauss-Seidel (aproximación al 5%).
+          </div>
+
+          <div class="grid-3">
+            <!-- Cantera 1 -->
+            <div style="background: rgba(0,0,0,0.3); padding: 1.25rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+              <div style="font-weight: 700; color: white; margin-bottom: 0.75rem;">Cantera 1 (x₁)</div>
+              <svg viewBox="0 0 160 120" style="width: 100%; height: 110px;">
+                <!-- Gauss -->
+                <rect x="25" y="40" width="28" height="70" rx="3" fill="#6366f1"/>
+                <text x="39" y="34" fill="white" font-size="9" text-anchor="middle" font-family="monospace">4011.6</text>
+                <text x="39" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Gauss</text>
+
+                <!-- Jordan -->
+                <rect x="65" y="40" width="28" height="70" rx="3" fill="#4338ca"/>
+                <text x="79" y="34" fill="white" font-size="9" text-anchor="middle" font-family="monospace">4011.6</text>
+                <text x="79" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Jordan</text>
+
+                <!-- Seidel -->
+                <rect x="105" y="39" width="28" height="71" rx="3" fill="#818cf8"/>
+                <text x="119" y="33" fill="#818cf8" font-size="9" font-weight="bold" text-anchor="middle" font-family="monospace">4037.8</text>
+                <text x="119" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Seidel</text>
+              </svg>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">
+                Diferencia Seidel: <strong>+0.65%</strong>
+              </div>
+            </div>
+
+            <!-- Cantera 2 -->
+            <div style="background: rgba(0,0,0,0.3); padding: 1.25rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+              <div style="font-weight: 700; color: white; margin-bottom: 0.75rem;">Cantera 2 (x₂)</div>
+              <svg viewBox="0 0 160 120" style="width: 100%; height: 110px;">
+                <!-- Gauss -->
+                <rect x="25" y="20" width="28" height="90" rx="3" fill="#6366f1"/>
+                <text x="39" y="14" fill="white" font-size="9" text-anchor="middle" font-family="monospace">7162.8</text>
+                <text x="39" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Gauss</text>
+
+                <!-- Jordan -->
+                <rect x="65" y="20" width="28" height="90" rx="3" fill="#4338ca"/>
+                <text x="79" y="14" fill="white" font-size="9" text-anchor="middle" font-family="monospace">7162.8</text>
+                <text x="79" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Jordan</text>
+
+                <!-- Seidel -->
+                <rect x="105" y="20" width="28" height="90" rx="3" fill="#818cf8"/>
+                <text x="119" y="14" fill="#818cf8" font-size="9" font-weight="bold" text-anchor="middle" font-family="monospace">7168.4</text>
+                <text x="119" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Seidel</text>
+              </svg>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">
+                Diferencia Seidel: <strong>+0.08%</strong>
+              </div>
+            </div>
+
+            <!-- Cantera 3 -->
+            <div style="background: rgba(0,0,0,0.3); padding: 1.25rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+              <div style="font-weight: 700; color: white; margin-bottom: 0.75rem;">Cantera 3 (x₃)</div>
+              <svg viewBox="0 0 160 120" style="width: 100%; height: 110px;">
+                <!-- Gauss -->
+                <rect x="25" y="30" width="28" height="80" rx="3" fill="#6366f1"/>
+                <text x="39" y="24" fill="white" font-size="9" text-anchor="middle" font-family="monospace">5125.6</text>
+                <text x="39" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Gauss</text>
+
+                <!-- Jordan -->
+                <rect x="65" y="30" width="28" height="80" rx="3" fill="#4338ca"/>
+                <text x="79" y="24" fill="white" font-size="9" text-anchor="middle" font-family="monospace">5125.6</text>
+                <text x="79" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Jordan</text>
+
+                <!-- Seidel -->
+                <rect x="105" y="31" width="28" height="79" rx="3" fill="#818cf8"/>
+                <text x="119" y="25" fill="#818cf8" font-size="9" font-weight="bold" text-anchor="middle" font-family="monospace">5114.0</text>
+                <text x="119" y="118" fill="var(--text-dim)" font-size="8" text-anchor="middle">Seidel</text>
+              </svg>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">
+                Diferencia Seidel: <strong>-0.23%</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 8. CONCLUSIÓN FINAL ==================== -->
+      <section id="conclusion" class="web-section" style="border-bottom: none;">
+        <div class="section-tag">08. Decisión Final</div>
+        <h2 class="section-title">Volúmenes de Extracción Finales</h2>
+        <p class="section-desc">
+          Para satisfacer las necesidades de 4,800 m³ de arena, 5,810 m³ de grava fina y 5,690 m³ de grava gruesa, el ingeniero civil debe solicitar:
+        </p>
+
+        <div class="grid-3" style="margin-top: 1rem;">
+          <div class="metric-card">
+            <div class="metric-label">Cantera 1 (x₁)</div>
+            <div class="metric-val">4,011.63 m³</div>
+            <div style="font-size:0.8rem; color: var(--text-dim);">Exacto: 4011.6279 m³</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Cantera 2 (x₂)</div>
+            <div class="metric-val">7,162.79 m³</div>
+            <div style="font-size:0.8rem; color: var(--text-dim);">Exacto: 7162.7907 m³</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Cantera 3 (x₃)</div>
+            <div class="metric-val">5,125.58 m³</div>
+            <div style="font-size:0.8rem; color: var(--text-dim);">Exacto: 5125.5814 m³</div>
+          </div>
+        </div>
+
+        <!-- Showcase Gráfico Final: Distribución Total y Desglose por Material -->
+        <div class="graphic-showcase" style="margin-top: 2rem;">
+          <div class="graphic-showcase-title">
+            <span>🏗️ Distribución Global y Aporte Físico a Cada Material de Construcción</span>
+          </div>
+          <div class="graphic-showcase-subtitle">
+            Verificación de ingeniería: proporción extraída de cada cantera y suma exacta de los volúmenes para cumplir el pedido civil.
+          </div>
+
+          <div class="grid-2">
+            <!-- Donut Chart SVG -->
+            <div style="background: rgba(0,0,0,0.25); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="font-weight:700; color:white; margin-bottom: 1.25rem;">
+                Participación por Cantera en la Extracción Total (16,300 m³)
+              </div>
+              <div class="donut-wrapper">
+                <div class="donut-svg-box">
+                  <svg viewBox="0 0 100 100" style="transform: rotate(-90deg); width: 100%; height: 100%;">
+                    <!-- Background Circle -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="16"/>
+                    
+                    <!-- Cantera 2 (43.94% -> dasharray: 104.9, circumference ~ 238.76) -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#4338ca" stroke-width="16"
+                            stroke-dasharray="104.9 238.76" stroke-dashoffset="0"/>
+                    
+                    <!-- Cantera 3 (31.45% -> dasharray: 75.1) -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#818cf8" stroke-width="16"
+                            stroke-dasharray="75.1 238.76" stroke-dashoffset="-104.9"/>
+                    
+                    <!-- Cantera 1 (24.61% -> dasharray: 58.8) -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#6366f1" stroke-width="16"
+                            stroke-dasharray="58.8 238.76" stroke-dashoffset="-180.0"/>
+                  </svg>
+                  <div class="donut-center-label">
+                    <div class="donut-center-val">16,300</div>
+                    <div class="donut-center-sub">m³ Total</div>
+                  </div>
+                </div>
+
+                <div class="donut-legend-list">
+                  <div class="donut-legend-card">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                      <span class="legend-color-dot" style="background:#4338ca;"></span>
+                      <strong>Cantera 2 (x₂)</strong>
+                    </div>
+                    <span style="font-family:var(--font-mono); color:white;">7,162.79 m³ (43.9%)</span>
+                  </div>
+
+                  <div class="donut-legend-card">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                      <span class="legend-color-dot" style="background:#818cf8;"></span>
+                      <strong>Cantera 3 (x₃)</strong>
+                    </div>
+                    <span style="font-family:var(--font-mono); color:white;">5,125.58 m³ (31.4%)</span>
+                  </div>
+
+                  <div class="donut-legend-card">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                      <span class="legend-color-dot" style="background:#6366f1;"></span>
+                      <strong>Cantera 1 (x₁)</strong>
+                    </div>
+                    <span style="font-family:var(--font-mono); color:white;">4,011.63 m³ (24.6%)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Desglose por Material -->
+            <div style="background: rgba(0,0,0,0.25); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="font-weight:700; color:white; margin-bottom: 1.25rem;">
+                Aporte Exacto por Cantera a Cada Material Requerido
+              </div>
+
+              <!-- Arena -->
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">🏖️ Arena: 4,800 m³</span>
+                  <span class="bar-label-val">C1: 2,086 m³ | C2: 1,433 m³ | C3: 1,281 m³</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c1" style="width: 43.5%;" title="Cantera 1: 2,086.05 m³ (52%)">43.5% C1</div>
+                  <div class="bar-chunk chunk-c2" style="width: 29.8%;" title="Cantera 2: 1,432.56 m³ (20%)">29.8% C2</div>
+                  <div class="bar-chunk chunk-c3" style="width: 26.7%;" title="Cantera 3: 1,281.40 m³ (25%)">26.7% C3</div>
+                </div>
+              </div>
+
+              <!-- Grava Fina -->
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">🪨 Grava Fina: 5,810 m³</span>
+                  <span class="bar-label-val">C1: 1,203 m³ | C2: 3,581 m³ | C3: 1,025 m³</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c1" style="width: 20.7%;" title="Cantera 1: 1,203.49 m³ (30%)">20.7% C1</div>
+                  <div class="bar-chunk chunk-c2" style="width: 61.6%;" title="Cantera 2: 3,581.39 m³ (50%)">61.6% C2</div>
+                  <div class="bar-chunk chunk-c3" style="width: 17.6%;" title="Cantera 3: 1,025.12 m³ (20%)">17.6% C3</div>
+                </div>
+              </div>
+
+              <!-- Grava Gruesa -->
+              <div class="bar-row">
+                <div class="bar-label-group">
+                  <span class="bar-label-title">🪨 Grava Gruesa: 5,690 m³</span>
+                  <span class="bar-label-val">C1: 722 m³ | C2: 2,149 m³ | C3: 2,819 m³</span>
+                </div>
+                <div class="multi-stacked-bar">
+                  <div class="bar-chunk chunk-c1" style="width: 12.7%;" title="Cantera 1: 722.09 m³ (18%)">12.7% C1</div>
+                  <div class="bar-chunk chunk-c2" style="width: 37.8%;" title="Cantera 2: 2,148.84 m³ (30%)">37.8% C2</div>
+                  <div class="bar-chunk chunk-c3" style="width: 49.5%;" title="Cantera 3: 2,819.07 m³ (55%)">49.5% C3</div>
+                </div>
+              </div>
+
+              <div class="chart-legend">
+                <div class="legend-item"><span class="legend-color-dot" style="background:#6366f1;"></span> Cantera 1</div>
+                <div class="legend-item"><span class="legend-color-dot" style="background:#4338ca;"></span> Cantera 2</div>
+                <div class="legend-item"><span class="legend-color-dot" style="background:#818cf8;"></span> Cantera 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modal de Apuntes Manuscritos Oficiales -->
+      <div v-if="apunteModal.show" class="apunte-modal-backdrop" @click.self="closeApunte">
+        <div class="apunte-modal-content">
+          <div class="apunte-modal-header">
+            <h3>{{ apunteModal.title }}</h3>
+            <button class="apunte-modal-close" @click="closeApunte">&times;</button>
+          </div>
+          <div class="apunte-modal-body">
+            <img :src="apunteModal.img" :alt="apunteModal.title">
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>Universidad Tecnológica de Panamá • Centro Regional de Azuero • Métodos Numéricos para Ingenieros 2026</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

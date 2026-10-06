@@ -1,0 +1,16 @@
+# Archivos temporales del sistema y respaldos
+archivo_historico/
+desktop.ini
+.DS_Store
+Thumbs.db
+
+# Documentos locales de texto y binarios no necesarios en producción
+*.docx
+*.pdf
+documentos/
+*.tmp
+*.log
+
+# Dependencias y entorno
+node_modules/
+.vercel/
