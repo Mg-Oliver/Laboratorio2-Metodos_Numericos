@@ -7,7 +7,7 @@
 ---
 
 ## 🌐 Despliegue en Vercel
-Este repositorio está preconfigurado para **Vercel** mediante `vercel.json`. Al acceder a la raíz del sitio se sirve de forma directa y fluida la **presentación web interactiva**.
+Este repositorio está optimizado para **Vercel** como aplicación web estática directa. Al acceder a la raíz del sitio se sirve inmediatamente la **presentación web interactiva** con todos sus estilos, gráficos SVG y simulador Vue 3.
 
 ---
 
@@ -22,16 +22,13 @@ El proyecto contiene únicamente los archivos que influyen directamente en la ej
 │   ├── gauss-seidel.js              # Gauss-Seidel iterativo con criterio Ea <= 5%
 │   └── index.js                     # Ejecutable principal en consola con tablas formateadas
 │
-├── presentacion/                    # Presentación web interactiva en scroll continuo
-│   ├── index.html                   # Interfaz, apuntes paso a paso y gráficas SVG
-│   ├── styles.css                   # Sistema de diseño sobrio (Paleta Obsidian & Índigo)
-│   ├── app.js                       # Lógica reactiva en Vue 3 y simulador en tiempo real
-│   └── assets/                      # Capturas de apuntes de clase manuscritos
-│
-├── index.html                       # Redirección automática inmediata a la presentación
-├── vercel.json                      # Enrutamiento y redirección en Vercel
-├── package.json                     # Metadatos del proyecto y scripts de ejecución
-├── .gitignore                       # Filtro de exclusión de archivos no esenciales
+├── assets/apuntes/                  # Capturas de apuntes de clase manuscritos
+├── index.html                       # Interfaz interactiva de la presentación
+├── styles.css                       # Sistema de diseño sobrio (Paleta Obsidian & Índigo)
+├── app.js                           # Lógica reactiva en Vue 3 y simulador en vivo
+├── vercel.json                      # Configuración de URLs y redirecciones limpias
+├── package.json                     # Metadatos del proyecto y scripts
+├── .gitignore                       # Filtro de exclusión de archivos locales no esenciales
 └── README.md                        # Documentación general
 ```
 
@@ -49,4 +46,4 @@ node algoritmos/index.js
 ```
 
 ### 2. Abrir la Presentación Web
-Abre directamente en tu navegador el archivo `presentacion/index.html` o corre cualquier servidor local estático.
+Abre directamente en tu navegador el archivo `index.html`.
