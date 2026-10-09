@@ -26,6 +26,8 @@ Cada método incluye controles de anterior/siguiente, inicio, reproducción, pau
 - Gauss-Jordan: eliminación inferior y superior hasta llegar a [I | x].
 - Gauss-Seidel: actualización individual de incógnitas y distinción entre valores nuevos y anteriores. La matriz de coeficientes permanece fija.
 
+Cada visor muestra también el código correspondiente al paso actual, con la instrucción activa resaltada y un diccionario de variables con valores reales. Los fragmentos se extraen del motor compartido; los nombres `matrizAumentada`, `filaPivote`, `filaDestino`, `multiplicador` y `solucion` describen su función. Gauss-Seidel separa actualización, cálculo de error y comprobación de parada, conservando las cuatro iteraciones del problema original.
+
 Los cuadros muestran la operación por columna. El redondeo es visual y no se utiliza en operaciones posteriores. En móvil las matrices muestran menos decimales para que se vea también la columna b. Se respeta la preferencia de movimiento reducido.
 
 ## Simulador

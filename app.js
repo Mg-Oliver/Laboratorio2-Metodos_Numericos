@@ -21,7 +21,40 @@ const MatrixPlayer = {
     const steps=computed(()=>result.value.data?.pasos || []);
     const step=computed(()=>steps.value[Math.min(position.value,steps.value.length-1)]);
     const shown=computed(()=>phase.value==='moving' ? step.value.before : step.value.matriz);
-    const vector=computed(()=>phase.value==='moving' && step.value.previousX ? step.value.previousX : step.value.x);
+    const vector=computed(()=>phase.value==='moving' && step.value.type==='iterate' ? step.value.previousX : step.value.x);
+    const methodLabel=computed(()=>({gauss:'Gauss',jordan:'Gauss-Jordan',seidel:'Gauss-Seidel'}[props.method]));
+    const codePanel=ref(null);
+    const codeLines=computed(()=>step.value ? Numerica.obtenerBloqueCodigo(props.method,step.value.type) : []);
+    const activeInstruction=computed(()=>({initial:'const solucion',normalize:'matrizAumentada[filaPivote][columna] /=',eliminate:'matrizAumentada[filaDestino][columna] -=',back:'solucion[filaActual] =',solution:'solucion[indiceFila] =',iterate:'solucion[filaActual] =',error:'erroresPorcentuales[filaActual] =',check:'convergio =',swap:'[matrizAumentada[filaPivote]'}[step.value?.type]));
+    const activeCodeLines=computed(()=>{
+      const start=codeLines.value.findIndex(line=>line.includes(activeInstruction.value));
+      if(start<0)return [];
+      const indices=[];
+      for(let index=start;index<codeLines.value.length;index++){
+        indices.push(index);
+        if(codeLines.value[index].includes(';'))break;
+      }
+      return indices;
+    });
+    const codeExplanation=computed(()=>({
+      initial:props.method==='seidel'?'Se prepara el vector solución y se fijan la tolerancia y el límite de iteraciones.':'Se construye [A | b] agregando la demanda al final de cada fila y se reserva el vector solución.',
+      normalize:'El bucle recorre todos los coeficientes y también la última columna. Cada elemento de la fila se divide entre el pivote.',
+      eliminate:props.method==='jordan'?'esGaussJordan = true: se recorren todas las filas excepto la del pivote, para eliminar por encima y por debajo.':'esGaussJordan = false: se comienza en filaPivote + 1 para eliminar únicamente debajo del pivote.',
+      back:'Se suman los términos con incógnitas conocidas y se restan de la demanda. Las filas se recorren desde la última hacia la primera.',
+      solution:'La matriz ya es la identidad. Se copia la última columna directamente al vector solución.',
+      iterate:'Se suman los términos ajenos a la diagonal y se despeja la incógnita. Se sobrescribe solucion[filaActual], por eso la siguiente ecuación utiliza el valor nuevo.',
+      error:'valorAnterior pertenece a la vuelta anterior. Se calcula el cambio relativo porcentual, con tratamiento explícito del cero y de la primera iteración.',
+      check:'every exige que todas las incógnitas cumplan la tolerancia. Si convergio es true, se termina el ciclo de iteraciones.',
+      swap:'Se intercambian dos ecuaciones para conseguir un pivote utilizable sin cambiar el sistema.'
+    }[step.value?.type] || ''));
+    const variableDescriptions={numeroIncognitas:'Cantidad de ecuaciones e incógnitas.',esGaussJordan:'true: elimina arriba y abajo; false: solo abajo.',filaPivote:'Índice de la fila que aporta el pivote.',filaDestino:'Índice de la fila que se modifica.',primeraFilaDestino:'Índice desde el que empieza la eliminación.',filaIntercambio:'Índice de la fila que se intercambia.',filaActual:'Índice de la ecuación que se está resolviendo.',pivote:'Coeficiente por el que se divide la fila.',multiplicador:'Factor con el que se multiplica la fila pivote.',sumaConocida:'Suma de los términos con valores disponibles.',valorCalculado:'Valor de la incógnita obtenida en este paso.',iteracion:'Número de vuelta del método iterativo.',valorActual:'Aproximación recién calculada.',valorAnterior:'Aproximación de la vuelta anterior.',errorPorcentual:'Cambio relativo de esta incógnita (%).',erroresPorcentuales:'Cambios relativos de todas las incógnitas (%).',toleranciaPorcentual:'Máximo cambio relativo permitido (%).',maximoIteraciones:'Máximo número de vueltas permitidas.',convergio:'Indica si ya se cumple el criterio de parada.',solucion:'Vector con las incógnitas calculadas.'};
+    const variableValues=computed(()=>Object.entries(step.value?.variables || {}).map(([name,value])=>({name,description:variableDescriptions[name],value: typeof value==='boolean'?String(value):Array.isArray(value)?'['+value.map(v=>f(v,4)).join('; ')+']':name.startsWith('fila')||name==='primeraFilaDestino'?`${value} → F${subs[value] || value+1}`:f(value,6)})));
+    watch(codeLines,async()=>{
+      await nextTick();
+      const scroll=codePanel.value?.querySelector('.step-code-scroll');
+      const active=codePanel.value?.querySelector('.code-line-active');
+      if(scroll && active)scroll.scrollTop=Math.max(0,active.offsetTop-90);
+    });
     const stop=()=>{playing.value=false;clearTimeout(timer);};
     function animate() {
       clearTimeout(motionTimer);
@@ -65,7 +98,7 @@ const MatrixPlayer = {
       if(e.key==='ArrowLeft'){e.preventDefault();go(position.value-1);}
       if(e.key===' '){e.preventDefault();play();}
     }
-    return {position,playing,speed,phase,reduced,result,steps,step,shown,vector,go,play,replay,arithmetic,key,f,subs,cellFormat,numerator};
+    return {position,playing,speed,phase,reduced,result,steps,step,shown,vector,go,play,replay,arithmetic,key,f,subs,cellFormat,numerator,methodLabel,codePanel,codeLines,activeCodeLines,codeExplanation,variableValues};
   },
   template:`
   <div class="matrix-player" :class="{'is-moving':phase==='moving','reduced-motion':reduced}" tabindex="0" @keydown="key" :aria-label="'Animación paso a paso: '+method">
@@ -84,6 +117,8 @@ const MatrixPlayer = {
       <div class="operation-title" aria-live="polite"><span class="step-num-badge">{{step.iter?'Iteración '+step.iter:'Paso '+(position+1)}}</span><h4>{{step.titulo}}</h4><p>{{step.descripcion}}</p></div>
       <div class="formula-display structured-math" v-if="step.type==='iterate'"><span>x<sub>{{step.row+1}}</sub><sup>({{step.iter}})</sup> = </span><span class="math-fraction"><span>{{numerator}}</span><span>{{f(matrix[step.row][step.row])}}</span></span><span> ≈ {{f(step.x[step.row],6)}}</span></div>
       <div class="formula-display" v-else>{{step.formula}}</div>
+      <div class="execution-layout">
+      <div class="execution-math">
       <div class="visual-stage" :class="{'seidel-stage':method==='seidel'}">
         <div class="matrix-panel">
           <div class="matrix-caption"><span>{{method==='seidel'?'Matriz A fija · sistema original':phase==='moving'?'Antes de aplicar la operación':'Matriz después de la operación'}}</span><span class="stage-pill">{{phase==='moving'?'Aplicando…':'Resultado'}}</span></div>
@@ -103,11 +138,21 @@ const MatrixPlayer = {
         </div>
         <div class="vector-panel" v-if="method==='seidel'||step.type==='back'||step.type==='solution'">
           <h4>{{method==='seidel'?'Valores usados en esta vuelta':'Solución por sustitución'}}</h4>
-          <div v-for="(v,j) in vector" :key="j" class="vector-value" :class="{'vector-active':j===step.row,'vector-new':method==='seidel'&&j<step.row}"><span>x{{subs[j]}}</span><Transition name="number" mode="out-in"><strong :key="f(v)">{{f(v)}}</strong></Transition><small>{{phase==='moving'&&method==='seidel'&&j===step.row?'calculando…':method==='seidel'&&step.iter?j<=step.row?'nuevo · vuelta '+step.iter:'anterior · vuelta '+(step.iter-1):v===null?'por calcular':'m³'}}</small></div>
+          <div v-for="(v,j) in vector" :key="j" class="vector-value" :class="{'vector-active':j===step.row,'vector-new':method==='seidel'&&(step.type==='check'||j<step.row)}"><span>x{{subs[j]}}</span><Transition name="number" mode="out-in"><strong :key="f(v)">{{f(v)}}</strong></Transition><small>{{phase==='moving'&&step.type==='iterate'&&j===step.row?'calculando…':method==='seidel'&&step.iter?(step.type==='check'||j<=step.row)?'nuevo · vuelta '+step.iter:'anterior · vuelta '+(step.iter-1):v===null?'por calcular':'m³'}}</small></div>
           <p class="small-note" v-if="method==='seidel'">El valor recién calculado se usa inmediatamente en la siguiente ecuación.</p>
         </div>
       </div>
       <div class="arithmetic-grid" v-if="arithmetic.length"><div v-for="(a,j) in arithmetic" :key="position+':'+j" class="arithmetic-card"><span class="eyebrow">{{a.label==='b'?'TÉRMINO INDEPENDIENTE':'COEFICIENTE DE '+a.label}}</span><p>{{a.expression}}</p><strong>≈ {{f(a.after,6)}}</strong></div></div>
+      </div>
+      <aside class="step-code-panel" ref="codePanel" :aria-label="'Código sincronizado de '+methodLabel">
+        <div class="step-code-heading"><span class="eyebrow">CÓDIGO EN ESTE PASO</span><strong>{{methodLabel}}</strong><span class="code-language">JavaScript</span></div>
+        <p class="code-step-label">{{step.titulo}}</p>
+        <div class="step-code-scroll" tabindex="0" aria-label="Fragmento de código del paso actual"><pre class="step-code"><code><span v-for="(line,index) in codeLines" :key="step.type+':'+index" class="step-code-line" :class="{'code-line-active':activeCodeLines.includes(index)}"><span class="code-line-number" aria-hidden="true">{{index+1}}</span><span class="code-line-text">{{line || ' '}}</span><span class="code-active-marker" v-if="activeCodeLines.includes(index)" aria-label="Instrucción activa">←</span></span></code></pre></div>
+        <p class="code-explanation">{{codeExplanation}}</p>
+        <div class="step-variables"><h4>Variables en este paso</h4><dl><div v-for="variable in variableValues" :key="variable.name"><dt><code>{{variable.name}}</code><small>{{variable.description}}</small></dt><dd>{{variable.value}}</dd></div></dl></div>
+        <p class="code-source-note"><code>coeficientes</code> = A · <code>terminosIndependientes</code> = b · <code>solucion</code> = x.<br>Fragmento del motor real <a href="algoritmos/core.js" target="_blank" rel="noopener">core.js</a>; omite el registro de las trazas. Los índices empiezan en 0: índice 0 = fila 1. La numeración es relativa a este bloque.</p>
+      </aside>
+      </div>
       <div class="notice" v-if="position===steps.length-1"><strong>{{method==='seidel'?result.data.converged?'Criterio de parada alcanzado':'No se alcanzó la tolerancia':'Solución calculada'}}</strong><p>x = [{{result.data.x.map(v=>f(v)).join('; ')}}] m³ · Máximo |Ax − b| = {{f(Math.max(...result.data.residual.map(Math.abs)),8)}} m³</p><p v-if="method==='seidel'">Ea mide el cambio entre iteraciones; no es el error respecto de la solución de referencia.</p></div>
       <p class="player-help">Flechas ← →: avanzar. Espacio: reproducir o pausar. Las cifras mostradas están redondeadas; los cálculos conservan su precisión.</p>
     </template>
